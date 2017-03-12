@@ -148,13 +148,15 @@
     <ul class="post-list">
     
         <li class="post-list-item fade">
-            <article id="post-hello-world"
+            <article id="post-ssd近期趋势"
   class="article-card article-type-post" itemprop="blogPost">
 
     <div class="post-meta">
-        <time class="post-time" title="2016年01月14日 20:07" datetime="2016-01-14T20:07:02.000Z"  itemprop="datePublished">2016-01-14</time>
+        <time class="post-time" title="2017年03月12日 15:39" datetime="2017-03-12T15:39:57.000Z"  itemprop="datePublished">2017-03-12</time>
 
         
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/系统组建/">系统组建</a></li></ul>
+
 
 
         
@@ -166,7 +168,7 @@
 
   
     <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2016/01/14/hello-world/">Hello World</a>
+      <a class="post-title-link" href="/2017/03/12/ssd近期趋势/">ssd近期趋势</a>
     </h3>
   
 
@@ -176,13 +178,71 @@
     <div class="post-content" id="post-content" itemprop="postContent">
 
     
-        Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Qu...
+        SSD相关趋势intel ssd种类以及定位
+从性能上从低到高依此为HDD-&gt;3d nand -&gt; optane -&gt; 非易失性ram
+3D NAND ssd是TLC的ssd，从TCO看已经可以代替10000转的sas硬盘，容量也很大，目前最大是16TB
+optane ssd是高性能ssd，会在17年二季度发布，随机读写性能都很强，为目前S3700十倍以上（之前的P3600...
     
 
-        <a href="/2016/01/14/hello-world/" class="post-more waves-effect waves-button">
+        <a href="/2017/03/12/ssd近期趋势/" class="post-more waves-effect waves-button">
             阅读全文...
         </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/云存储/">云存储</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/硬件评估/">硬件评估</a></li></ul>
+
+    </div>
+    
+</article>
+
+        </li>
+    
+        <li class="post-list-item fade">
+            <article id="post-note-of-ambry"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017年03月12日 15:21" datetime="2017-03-12T15:21:03.000Z"  itemprop="datePublished">2017-03-12</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/系统设计/">系统设计</a></li></ul>
+
+
+
+        
+
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/2017/03/12/note-of-ambry/">note of ambry</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。
+LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分别是用来存储和检索数据的一组数据节点，路由请求的前端机器（请求会在一些预处理之后路由到数据节点上）以及协调和维护集群的集群管理器。数据节点会在不同节点之间复制数据，同时支持数据中心内部和数据中间之间的复制。前端提供了支持对象PUT、GET和DELETE操作的HTTP API。另外，前端所使用的路由 库也可以直接用在客户端中，从而实现更好的性能。在LinkedIn，这些前端节点会作为CDN的原始服务器。ambry官方文档
+    
+
+        <a href="/2017/03/12/note-of-ambry/" class="post-more waves-effect waves-button">
+            阅读全文...
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/云存储/">云存储</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/分布式/">分布式</a></li></ul>
+
     </div>
     
 </article>

@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="utf-8">
+    
+    
+    
+    <title>note of ambry | wei的博客 | 点点滴滴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="分布式,云存储">
+    <meta name="description" content="看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。
+LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分别是用来存储和检索数据的一组数据节点，路由请求的前端机器（请求会在一些预处理之后路由到数据节点上）以及协调和维护集群的集群管理器。数据节点会在不同节点之间复制数据，同时支持数据中心内部和数据中间之间的复制。前端提供了支持对象PUT、GET和D">
+<meta property="og:type" content="article">
+<meta property="og:title" content="note of ambry">
+<meta property="og:url" content="https://moying050.github.io/2017/03/12/note-of-ambry/index.html">
+<meta property="og:site_name" content="wei的博客">
+<meta property="og:description" content="看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。
+LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分别是用来存储和检索数据的一组数据节点，路由请求的前端机器（请求会在一些预处理之后路由到数据节点上）以及协调和维护集群的集群管理器。数据节点会在不同节点之间复制数据，同时支持数据中心内部和数据中间之间的复制。前端提供了支持对象PUT、GET和D">
+<meta property="og:image" content="https://github.com/linkedin/ambry/wiki/images/clustermap.png">
+<meta property="og:image" content="https://github.com/linkedin/ambry/wiki/images/replication1.png">
+<meta property="og:image" content="https://github.com/linkedin/ambry/wiki/images/replication2.png">
+<meta property="og:image" content="https://github.com/linkedin/ambry/wiki/images/replication3.png">
+<meta property="og:image" content="https://github.com/linkedin/ambry/wiki/images/replication4.png">
+<meta property="og:image" content="https://github.com/linkedin/ambry/wiki/images/replication5.png">
+<meta property="og:image" content="https://github.com/linkedin/ambry/wiki/images/replication6.png">
+<meta property="og:image" content="https://github.com/linkedin/ambry/wiki/images/replication7.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/wiki/linkedin/ambry/images/image2016-3-10%2015_27_16.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/wiki/linkedin/ambry/images/image2015-11-25%2018_12_21.png">
+<meta property="og:image" content="https://github.com/linkedin/ambry/wiki/images/image2015-11-25%2018_13_1.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/wiki/linkedin/ambry/images/image2015-11-25%2018_13_43.png">
+<meta property="og:updated_time" content="2017-03-12T15:32:57.628Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="note of ambry">
+<meta name="twitter:description" content="看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。
+LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分别是用来存储和检索数据的一组数据节点，路由请求的前端机器（请求会在一些预处理之后路由到数据节点上）以及协调和维护集群的集群管理器。数据节点会在不同节点之间复制数据，同时支持数据中心内部和数据中间之间的复制。前端提供了支持对象PUT、GET和D">
+<meta name="twitter:image" content="https://github.com/linkedin/ambry/wiki/images/clustermap.png">
+    
+        <link rel="alternative" href="/atom.xml" title="wei的博客" type="application/atom+xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.10">
+    <script>window.lazyScripts=[]</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</head>
+
+<body>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/head_smile.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Wei GAO</h5>
+          <a href="mailto:moying050@gmail.com" title="moying050@gmail.com" class="mail">moying050@gmail.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/moying050" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/moying050" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">note of ambry</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">note of ambry</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2017-03-12T15:21:03.000Z" itemprop="datePublished" class="page-time">
+  2017-03-12
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/系统设计/">系统设计</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#LinkedIn的分布式对象存储系统-Ambry介绍"><span class="post-toc-number">1.</span> <span class="post-toc-text">LinkedIn的分布式对象存储系统 Ambry介绍</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Clustermap"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">Clustermap</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#存储"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">存储</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#疑问"><span class="post-toc-number">1.2.1.</span> <span class="post-toc-text">疑问</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#持久化"><span class="post-toc-number">1.2.2.</span> <span class="post-toc-text">持久化</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#零拷贝"><span class="post-toc-number">1.2.3.</span> <span class="post-toc-text">零拷贝</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#恢复"><span class="post-toc-number">1.2.4.</span> <span class="post-toc-text">恢复</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#复制"><span class="post-toc-number">1.2.5.</span> <span class="post-toc-text">复制</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#删除"><span class="post-toc-number">1.2.6.</span> <span class="post-toc-text">删除</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#路由-前端"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">路由/前端</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#请求管理"><span class="post-toc-number">1.3.1.</span> <span class="post-toc-text">请求管理</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#分块"><span class="post-toc-number">1.3.2.</span> <span class="post-toc-text">分块</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#故障检测"><span class="post-toc-number">1.3.3.</span> <span class="post-toc-text">故障检测</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Quorum"><span class="post-toc-number">1.3.4.</span> <span class="post-toc-text">Quorum</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#变更捕获"><span class="post-toc-number">1.3.5.</span> <span class="post-toc-text">变更捕获</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#安全控制"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">安全控制</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#需求"><span class="post-toc-number">1.4.1.</span> <span class="post-toc-text">需求</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#框架"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">框架</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Scaling-Layer"><span class="post-toc-number">1.5.1.</span> <span class="post-toc-text">Scaling Layer</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Remote-Service-Layer："><span class="post-toc-number">1.5.2.</span> <span class="post-toc-text">Remote Service Layer：</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#NIO-layer-上层对外的网络服务"><span class="post-toc-number">1.5.3.</span> <span class="post-toc-text">NIO layer: 上层对外的网络服务</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#部件交互"><span class="post-toc-number">1.5.4.</span> <span class="post-toc-text">部件交互</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#收包"><span class="post-toc-number">1.5.4.1.</span> <span class="post-toc-text">收包</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#包的异步处理"><span class="post-toc-number">1.5.4.2.</span> <span class="post-toc-text">包的异步处理</span></a></li></ol></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+<article id="post-note-of-ambry"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">note of ambry</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017年03月12日 15:21" datetime="2017-03-12T15:21:03.000Z"  itemprop="datePublished">2017-03-12</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/系统设计/">系统设计</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。</p>
+<h1 id="LinkedIn的分布式对象存储系统-Ambry介绍"><a href="#LinkedIn的分布式对象存储系统-Ambry介绍" class="headerlink" title="LinkedIn的分布式对象存储系统 Ambry介绍"></a>LinkedIn的分布式对象存储系统 Ambry介绍</h1><p>Ambry由三部分组成，分别是用来存储和检索数据的一组数据节点，路由请求的前端机器（请求会在一些预处理之后路由到数据节点上）以及协调和维护集群的集群管理器。数据节点会在不同节点之间复制数据，同时支持数据中心内部和数据中间之间的复制。前端提供了支持对象PUT、GET和DELETE操作的HTTP API。另外，前端所使用的路由 库也可以直接用在客户端中，从而实现更好的性能。在LinkedIn，这些前端节点会作为CDN的原始服务器。<a href="https://github.com/linkedin/ambry/wiki/High%20Level%20Design" target="_blank" rel="external">ambry官方文档</a><br><a id="more"></a></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://github.com/linkedin/ambry/wiki/images/clustermap.png" alt="概览图" title="">
+                </div>
+                <div class="image-caption">概览图</div>
+            </figure>
+<h2 id="Clustermap"><a href="#Clustermap" class="headerlink" title="Clustermap"></a>Clustermap</h2><blockquote>
+<p>Clustermap控制拓扑结构、维护状态并帮助协调集群的操作.数据节点和前端服务器都能够访问clustermap，并且会始终使用它们当前的视图来做出决策，这些决策涉及到选择可用的机器、过滤副本以及识别对象的位置等</p>
+</blockquote>
+<ul>
+<li>硬件布局：包含了机器的列表、每台机器上的磁盘以及每个磁盘的容量。布局还维护资源的状态（机器和磁盘）并指定主机名和端口，通过主机名和端口就能连接到数据节点</li>
+<li>分区布局：包含了分区的列表、它们的位置信息以及状态。在Ambry中，分区有一个数字表示的ID，副本的列表可以跨数据中心。分区是固定大小的资源，集群间的数据重平衡都是在分区级别进行的</li>
+<li><p>partiton layout</p>
+<p>  partition ID | state      | replica<br>  ————-|————|—————————————————<br>  partition_0  | read/write | DC1:node1:disk_0 DC1:node4:disk_1 DC2:node2:disk_0<br>  partition_1  | readonly   | DC2:node0:disk_0 DC1:node4:disk_3 DC2:node2:disk_2</p>
+</li>
+</ul>
+<h2 id="存储"><a href="#存储" class="headerlink" title="存储"></a>存储</h2><blockquote>
+<p>索引本身也是持久化的文件，会定时更新，更新之间的时间窗之内的时间可以通过读取日志来重建。检查点应该对应持久化的索引文件组。<br>磁盘log引入可以让写入顺序化，减少磁盘碎片</p>
+</blockquote>
+<h3 id="疑问"><a href="#疑问" class="headerlink" title="疑问"></a>疑问</h3><ol>
+<li>节点有文件删除，则日志中应该有数据可以丢弃，如何释放这部分空间</li>
+<li>这里包含很多优化，不知道是什么</li>
+</ol>
+<h3 id="持久化"><a href="#持久化" class="headerlink" title="持久化"></a>持久化</h3><ul>
+<li>磁盘上的每个副本均被建模为预先分配的log（preallocated log），通过fallocate创建大文件，然后在里面append写入，保证顺序写入。</li>
+<li>所有新的消息都会按照顺序附加到log上，消息是由实际的对象块（chunk）和相关的元数据（系统和用户）所组成的。</li>
+<li>这能够使写入操作实现很高的吞吐量，并且避免出现磁盘碎片。</li>
+<li>Ambry会使用索引将对象id与log中的消息映射起来，索引本身是一组排序的文件片段，条目按照最新使用在前，最旧的条目在后的顺序，从而便于高效查找。</li>
+<li>索引中的每个条目都维护了log中消息的偏移量、消息的属性以及一些内部使用的域。</li>
+<li>索引中的每个片段会维护一个bloom filter，从而优化实际磁盘操作所耗费的时间；</li>
+<li>索引只有最新几个载入内存，其他都是map到内存地址，需要时才会读</li>
+</ul>
+<h3 id="零拷贝"><a href="#零拷贝" class="headerlink" title="零拷贝"></a>零拷贝</h3><ul>
+<li>通过使用sendfile API，在进行读取时，字节从log转移到网络的过程中实现了零拷贝。</li>
+<li>通过避免额外的系统调用，实现了更好的性能，在这个过程中，会确保字节不会读入到用户内存中，不必进行缓存池的管理</li>
+<li>读加速通过CDN，因此这里不需要读缓存</li>
+</ul>
+<h3 id="恢复"><a href="#恢复" class="headerlink" title="恢复"></a>恢复</h3><ul>
+<li>因为系统和机器会出现宕机，磁盘上的数据也有可能会损坏，所以有必要实现恢复（recovery）的功能。</li>
+<li>在启动的时候，存储层会从最后一个已知的检查点读取log，并重建索引。</li>
+<li>恢复也有助于重建内存中的状态。Log是恢复的来源，并且会永久保存</li>
+</ul>
+<h3 id="复制"><a href="#复制" class="headerlink" title="复制"></a>复制</h3><ul>
+<li>存储节点还需要维护分区中各副本的同步。</li>
+<li>每个节点上都会有一个复制服务（replication service），它会负责保证本地存储中的副本与所有的远程副本是同步的。</li>
+<li>在这里，进行了很多的优化，以保证复制过程的高效可靠<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://github.com/linkedin/ambry/wiki/images/replication1.png" alt="step1" title="">
+                </div>
+                <div class="image-caption">step1</div>
+            </figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://github.com/linkedin/ambry/wiki/images/replication2.png" alt="step2" title="">
+                </div>
+                <div class="image-caption">step2</div>
+            </figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://github.com/linkedin/ambry/wiki/images/replication3.png" alt="step3" title="">
+                </div>
+                <div class="image-caption">step3</div>
+            </figure>
+  replica 2之前从其他节点同步过数据，因此可能需要检查自己还缺哪些blobid<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://github.com/linkedin/ambry/wiki/images/replication4.png" alt="step4" title="">
+                </div>
+                <div class="image-caption">step4</div>
+            </figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://github.com/linkedin/ambry/wiki/images/replication5.png" alt="step5" title="">
+                </div>
+                <div class="image-caption">step5</div>
+            </figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://github.com/linkedin/ambry/wiki/images/replication6.png" alt="step6" title="">
+                </div>
+                <div class="image-caption">step6</div>
+            </figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://github.com/linkedin/ambry/wiki/images/replication7.png" alt="step7" title="">
+                </div>
+                <div class="image-caption">step7</div>
+            </figure>
+</li>
+</ul>
+<h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><ul>
+<li>删除的数据在落日志后还在磁盘上，空间没有释放</li>
+<li>周期性扫描待删除的数据，跳过最近被删除的数据</li>
+<li>删除数据会重写磁盘（至少把log中元数据相关清理掉），有模块会做流控防止io被删除占满</li>
+<li></li>
+</ul>
+<h2 id="路由-前端"><a href="#路由-前端" class="headerlink" title="路由/前端"></a>路由/前端</h2><blockquote>
+<p>多主策略是如何实现的，如何仲裁</p>
+</blockquote>
+<h3 id="请求管理"><a href="#请求管理" class="headerlink" title="请求管理"></a>请求管理</h3><ul>
+<li>路由会处理PUT、GET以及DELETE请求。</li>
+<li>对于其中的每个请求类型，路由都会跟踪副本成功和失败的数量从而确定Quorum的值、维护分块的状态、生成对象id并在成功或失败的时候触发对应的回调</li>
+</ul>
+<h3 id="分块"><a href="#分块" class="headerlink" title="分块"></a>分块</h3><ul>
+<li>对象会分解为块（chunk），每个块都能够跨分区独立地进行路由。</li>
+<li>每个块都会有一个id来进行唯一标识。</li>
+<li>路由会生成一个元数据对象，其中包含了块的列表以及它们所需的获取顺序。元数据对象存储为独立的blob，它的id也会作为blob的id。</li>
+<li>在读取的时候，会得到元数据对象，然后检索各个块并返回给客户端</li>
+</ul>
+<h3 id="故障检测"><a href="#故障检测" class="headerlink" title="故障检测"></a>故障检测</h3><ul>
+<li>故障检测的逻辑要负责主动识别宕机或状态出问题的资源。</li>
+<li>资源可以是机器、磁盘或分区。</li>
+<li>路由会将出现问题的资源标记为不可用，这样后续的请求就不会使用它们了</li>
+</ul>
+<h3 id="Quorum"><a href="#Quorum" class="headerlink" title="Quorum"></a>Quorum</h3><ul>
+<li>Ambry为写入和读取实现了一种多主人（multi-master）的策略。</li>
+<li>这能够实现更高的可用性并减少端到端的延迟</li>
+<li>这是通过减少一个额外的hop来实现的，</li>
+<li>在基于主从结构（master slave）的系统中，往往会有这个额外的hop。请求通常会发往M个副本，然后等待至少N个成功的响应（这里N&lt;=M）。</li>
+<li>路由会优先使用本地数据中心的副本，向其发送请求，如果本地存储无法实现所需的Quorum的话，它会代理远程数据中心的访问</li>
+</ul>
+<h3 id="变更捕获"><a href="#变更捕获" class="headerlink" title="变更捕获"></a>变更捕获</h3><ul>
+<li>在每次成功的PUT或DELETE操作之后，路由会生成一个变更捕获（change capture）。</li>
+<li>变更捕获中所包含的信息是blob id以及blob相关的元数据，这个信息可以被下游的应用所使用。</li>
+<li>文件的写入删除会可以通知下游应用，比如kafka</li>
+</ul>
+<h2 id="安全控制"><a href="#安全控制" class="headerlink" title="安全控制"></a>安全控制</h2><h3 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h3><ul>
+<li>多租户引入需要安全保证</li>
+<li>使用SSL/TLS做传输的加密</li>
+<li>对于哪些传输需要加密可配置，默认不加密</li>
+</ul>
+<h2 id="框架"><a href="#框架" class="headerlink" title="框架"></a>框架</h2><blockquote>
+<p>数据传递需要考虑数据传输可以支持异步读写，内存拷贝减少，压力反馈。在层与层之间传递数据通过传递相关类实现，避免了过多的内存拷贝</p>
+</blockquote>
+<h3 id="Scaling-Layer"><a href="#Scaling-Layer" class="headerlink" title="Scaling Layer"></a>Scaling Layer</h3><ul>
+<li>中间层执行非阻塞操作，传递数据</li>
+<li>RestRequestHandler<ul>
+<li>处理由NIO layer发起的请求</li>
+<li>内部由多个单元（类似多线程），单元多少影响数据吞吐量和延迟</li>
+</ul>
+</li>
+<li>RestResponseHandler <ul>
+<li>处理由Remote Service Layer发起的response</li>
+<li>内部由多个单元（类似多线程），单元多少影响数据吞吐量和延迟</li>
+</ul>
+</li>
+<li>AsyncRequestResponseHandler<ul>
+<li>内部包含了RestRequestHandler和RestResponseHandler</li>
+<li>处理请求和回复是异步的</li>
+<li>请求由一个或多个单元处理，称为 AsyncRequestWorker</li>
+<li>AsyncRequestWorker需要维护状态：等待处理的请求/正在处理的请求/等待被发送出去，回复的请求</li>
+</ul>
+</li>
+</ul>
+<h3 id="Remote-Service-Layer："><a href="#Remote-Service-Layer：" class="headerlink" title="Remote Service Layer："></a>Remote Service Layer：</h3><ul>
+<li>底层网络相关处理以及路由处理</li>
+<li>这一层是单例无状态的，数据状态都存放于NIO layer初始化，用于数据传输的ReadableStreamChannel/RestResponseChannel上</li>
+</ul>
+<h3 id="NIO-layer-上层对外的网络服务"><a href="#NIO-layer-上层对外的网络服务" class="headerlink" title="NIO layer: 上层对外的网络服务"></a>NIO layer: 上层对外的网络服务</h3><ul>
+<li>负责对外所有网络相关操作<ul>
+<li>接收端：比如HTTP编解码/接收来自client的请求，处理/向下传递</li>
+<li>发送端：将回复发送给client</li>
+</ul>
+</li>
+<li>维护一些状态：<ul>
+<li>维护能用来处理请求的RestRequestHandler</li>
+<li>每个channel也要维护其中请求的状态<ul>
+<li>正在处理的RestRequest </li>
+<li>RestResponseChannel对于每个请求也维护各自状态，方便处理对应的错误</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="部件交互"><a href="#部件交互" class="headerlink" title="部件交互"></a>部件交互</h3><h4 id="收包"><a href="#收包" class="headerlink" title="收包"></a>收包</h4><p>NIO layer将包解出来，以RestRequest的形式搭配RestResponseChannel(用来传递回复消息)传递给RestRequestHandler，以做异步处理</p>
+<h4 id="包的异步处理"><a href="#包的异步处理" class="headerlink" title="包的异步处理"></a>包的异步处理</h4><p>线程从request queue中取出rest request，做不同处理</p>
+<ul>
+<li>handleGet：AmbryBlobStorageService从request中解出blob id，做相应处理交互</li>
+<li>GET request：获取blob属性和内容，之前先创建 Callback object，待前面获取到了之后回调<ul>
+<li><figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://raw.githubusercontent.com/wiki/linkedin/ambry/images/image2016-3-10%2015_27_16.png" alt="GET" title="">
+                </div>
+                <div class="image-caption">GET</div>
+            </figure></li>
+</ul>
+</li>
+<li>handlePost: ReadableStreamChannel在这里的作用是在失败时或成功时返回结果以及反馈线路上的压力<ul>
+<li>在路由侧，接收推送的数据时，读不是有数据就去读的，而是等前一波数据推完了再读下一批，不通过事件机制读取数据</li>
+<li>原因是这样可以给发送数据一侧反馈压力（利用tcp本身的机制）</li>
+<li><figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://raw.githubusercontent.com/wiki/linkedin/ambry/images/image2015-11-25%2018_12_21.png" alt="POST" title="">
+                </div>
+                <div class="image-caption">POST</div>
+            </figure></li>
+</ul>
+</li>
+<li>handleDelete：<ul>
+<li><figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://github.com/linkedin/ambry/wiki/images/image2015-11-25%2018_13_1.png" alt="DELETE" title="">
+                </div>
+                <div class="image-caption">DELETE</div>
+            </figure></li>
+</ul>
+</li>
+<li>handleHead：<ul>
+<li><figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://raw.githubusercontent.com/wiki/linkedin/ambry/images/image2015-11-25%2018_13_43.png" alt="HEAD" title="">
+                </div>
+                <div class="image-caption">HEAD</div>
+            </figure>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2017-03-12T15:32:57.628Z" itemprop="dateUpdated">2017年3月12日 15:32</time>
+</span><br>
+
+
+        转载请注明出处：<a href="/2017/03/12/note-of-ambry/" target="_blank" rel="external">https://moying050.github.io/2017/03/12/note-of-ambry/</a>
+    </div>
+    <footer>
+        <a href="https://moying050.github.io">
+            <img src="/img/head_smile.jpg" alt="Wei GAO">
+            Wei GAO
+        </a>
+    </footer>
+</blockquote>
+
+        
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/云存储/">云存储</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/分布式/">分布式</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017/03/12/note-of-ambry/&title=《note of ambry》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017/03/12/note-of-ambry/&title=《note of ambry》 — wei的博客&source=看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。
+LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017/03/12/note-of-ambry/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《note of ambry》 — wei的博客&url=https://moying050.github.io/2017/03/12/note-of-ambry/&via=https://moying050.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017/03/12/note-of-ambry/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2017/03/12/ssd近期趋势/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">ssd近期趋势</h4>
+      </a>
+    </div>
+  
+
+  
+</nav>
+
+
+
+    
+
+<div class="comments" id="comments">
+    <div class="ds-thread" data-thread-key="note-of-ambry" data-title="note of ambry" data-url="https://moying050.github.io/2017/03/12/note-of-ambry/"></div>
+</div>
+<script>
+lazyScripts.push('//cdn.bootcss.com/marked/0.3.6/marked.min.js');
+
+var duoshuoQuery = {short_name:'moying050_github', theme: 'none'};
+lazyScripts.push('/js/embed.min.js?v=1.4.10');
+
+
+</script>
+
+
+
+
+
+
+
+</article>
+
+<div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        谢谢大爷~
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <ul class="reward-items">
+        
+        <li>
+            <img src="/img/wechat.jpg" title="微信打赏二维码" alt="微信打赏二维码">
+            <p>微信</p>
+        </li>
+        
+
+        
+        <li>
+            <img src="/img/alipay.jpg" title="支付宝打赏二维码" alt="支付宝打赏二维码">
+            <p>支付宝</p>
+        </li>
+        
+    </ul>
+</div>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            <span>博客内容遵循 <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a></span>
+            <span>wei的博客 &copy; 2015 - 2017</span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017/03/12/note-of-ambry/&title=《note of ambry》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017/03/12/note-of-ambry/&title=《note of ambry》 — wei的博客&source=看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。
+LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017/03/12/note-of-ambry/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《note of ambry》 — wei的博客&url=https://moying050.github.io/2017/03/12/note-of-ambry/&via=https://moying050.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017/03/12/note-of-ambry/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACKklEQVR42u3aQZKjMAwF0Nz/0pntVM3gfEmhq7Efq64EGh6LH8vS6xUf77+Ofz9Zf9v7n687DgwMjMcy3stjfYPkqt6Z+bNhYGCcw7hKsOScPI57Ebx+NgwMDIx1CFaXegkJAwMD42cCN6k3kxeEgYGBUS1iewVtr1i9sRbHwMB4IGMekff9fUt/AwMD41GMd/GYhOYkrD88FQYGxtaMPODyJdr6896ZSQsBAwPjTEZ15KLXjPwWDAMDY1dGPgSWU3uDFAng8nwMDIwDGNV4TTbj5iHe/MXAwMA4hrG+eBSOcVg3p0UwMDC2YySY3rZ+HtmTjTkMDIwTGNVNsXxsK2kq9IL+P59gYGAcwMiXYtXbV8cvmqUvBgbG1oz1g1aL2N6is9q2vLw7BgbGpoxeWzEpPvMY7Q1bYGBgnMPI47J8cTHQq0VsHvoYGBh7MKrbZOuA7r256vK03FnFwMB4LCMvLAs5Xdxo+8JIBwYGxtaMvDGZx+hk/CsfILvcNcTAwDiG0Vs+Jhtt8zZAIXAxMDC2YyQLu97GXC+Uy+GOgYFxAGNeUlYDt/eybvzdwMDA+JWMd/GYACb7/B+25zAwMLZmzLuEvXGKfOE4aYtiYGDsxJgMVdwx/ZEHNwYGxmmM6gOtmwHrcJws+y6RGBgYGIMFXN5U6A1zYGBgYOQ3+9ZAajXcMTAwzmFUl3d51vWC+8btNgwMjAcy8tIxL0q/FdPzpScGBsbDGX8AMVUsur0ArJoAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+
+
+
+</script>
+
+<script src="/js/main.min.js?v=1.4.10"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="/js/search.min.js?v=1.4.10" async></script>
+
+
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+
+
+
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+
+</body>
+</html>
