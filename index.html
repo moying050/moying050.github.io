@@ -148,6 +148,62 @@
     <ul class="post-list">
     
         <li class="post-list-item fade">
+            <article id="post-阿里中间件阅读笔记"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017年03月13日 15:11" datetime="2017-03-13T15:11:50.000Z"  itemprop="datePublished">2017-03-13</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/系统设计/">系统设计</a></li></ul>
+
+
+
+        
+
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/2017/03/13/阿里中间件阅读笔记/">阿里中间件阅读笔记</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        中间件阅读笔记推拉模式的选择使用长连接拉模式，在消息的实时性方面丝毫不逊推送模式
+低延时探索
+考量性能从吞吐量和延迟两方面考虑
+依赖系统自身的page cache，全链路延时不可控
+延时变高导致该时间系统内处理的请求数增多，会导致某些节点不可用并扩散，导致雪崩
+
+锁相关非公平锁：加锁时不考虑排队问题，直接尝试获取锁，若失败则自动进行排队。非公平锁导致线程等待时间过长，延迟变高。
+锁同步会引起...
+    
+
+        <a href="/2017/03/13/阿里中间件阅读笔记/" class="post-more waves-effect waves-button">
+            阅读全文...
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/中间件/">中间件</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/消息队列/">消息队列</a></li></ul>
+
+    </div>
+    
+</article>
+
+        </li>
+    
+        <li class="post-list-item fade">
             <article id="post-并发控制相关"
   class="article-card article-type-post" itemprop="blogPost">
 

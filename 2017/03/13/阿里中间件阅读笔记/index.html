@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="utf-8">
+    
+    
+    
+    <title>阿里中间件阅读笔记 | wei的博客 | 点点滴滴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="中间件,消息队列">
+    <meta name="description" content="中间件阅读笔记推拉模式的选择使用长连接拉模式，在消息的实时性方面丝毫不逊推送模式
+低延时探索
+考量性能从吞吐量和延迟两方面考虑
+依赖系统自身的page cache，全链路延时不可控
+延时变高导致该时间系统内处理的请求数增多，会导致某些节点不可用并扩散，导致雪崩
+
+锁相关非公平锁：加锁时不考虑排队问题，直接尝试获取锁，若失败则自动进行排队。非公平锁导致线程等待时间过长，延迟变高。
+锁同步会引起上下文">
+<meta property="og:type" content="article">
+<meta property="og:title" content="阿里中间件阅读笔记">
+<meta property="og:url" content="https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/index.html">
+<meta property="og:site_name" content="wei的博客">
+<meta property="og:description" content="中间件阅读笔记推拉模式的选择使用长连接拉模式，在消息的实时性方面丝毫不逊推送模式
+低延时探索
+考量性能从吞吐量和延迟两方面考虑
+依赖系统自身的page cache，全链路延时不可控
+延时变高导致该时间系统内处理的请求数增多，会导致某些节点不可用并扩散，导致雪崩
+
+锁相关非公平锁：加锁时不考虑排队问题，直接尝试获取锁，若失败则自动进行排队。非公平锁导致线程等待时间过长，延迟变高。
+锁同步会引起上下文">
+<meta property="og:updated_time" content="2017-03-13T15:15:40.138Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="阿里中间件阅读笔记">
+<meta name="twitter:description" content="中间件阅读笔记推拉模式的选择使用长连接拉模式，在消息的实时性方面丝毫不逊推送模式
+低延时探索
+考量性能从吞吐量和延迟两方面考虑
+依赖系统自身的page cache，全链路延时不可控
+延时变高导致该时间系统内处理的请求数增多，会导致某些节点不可用并扩散，导致雪崩
+
+锁相关非公平锁：加锁时不考虑排队问题，直接尝试获取锁，若失败则自动进行排队。非公平锁导致线程等待时间过长，延迟变高。
+锁同步会引起上下文">
+    
+        <link rel="alternative" href="/atom.xml" title="wei的博客" type="application/atom+xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.10">
+    <script>window.lazyScripts=[]</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</head>
+
+<body>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/head_smile.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Wei GAO</h5>
+          <a href="mailto:moying050@gmail.com" title="moying050@gmail.com" class="mail">moying050@gmail.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/moying050" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/moying050" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">阿里中间件阅读笔记</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">阿里中间件阅读笔记</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2017-03-13T15:11:50.000Z" itemprop="datePublished" class="page-time">
+  2017-03-13
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/系统设计/">系统设计</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#中间件阅读笔记"><span class="post-toc-number">1.</span> <span class="post-toc-text">中间件阅读笔记</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#推拉模式的选择"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">推拉模式的选择</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#低延时探索"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">低延时探索</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#锁相关"><span class="post-toc-number">1.2.1.</span> <span class="post-toc-text">锁相关</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#内存没那么快"><span class="post-toc-number">1.2.2.</span> <span class="post-toc-text">内存没那么快</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#page-cache——利与弊"><span class="post-toc-number">1.2.3.</span> <span class="post-toc-text">page cache——利与弊</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#容量保障"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">容量保障</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#限流"><span class="post-toc-number">1.3.1.</span> <span class="post-toc-text">限流</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#降级"><span class="post-toc-number">1.3.2.</span> <span class="post-toc-text">降级</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#熔断"><span class="post-toc-number">1.3.3.</span> <span class="post-toc-text">熔断</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#高可用"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">高可用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#高可用架构中的技术与权衡"><span class="post-toc-number">1.4.1.</span> <span class="post-toc-text">高可用架构中的技术与权衡</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#消息服务介绍"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">消息服务介绍</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#路由系统"><span class="post-toc-number">1.5.1.</span> <span class="post-toc-text">路由系统</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#存储系统"><span class="post-toc-number">1.5.2.</span> <span class="post-toc-text">存储系统</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#推送系统"><span class="post-toc-number">1.5.3.</span> <span class="post-toc-text">推送系统</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#架构"><span class="post-toc-number">1.5.4.</span> <span class="post-toc-text">架构</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#快速确认消息"><span class="post-toc-number">1.5.4.1.</span> <span class="post-toc-text">快速确认消息</span></a></li></ol></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+<article id="post-阿里中间件阅读笔记"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">阿里中间件阅读笔记</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017年03月13日 15:11" datetime="2017-03-13T15:11:50.000Z"  itemprop="datePublished">2017-03-13</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/系统设计/">系统设计</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h1 id="中间件阅读笔记"><a href="#中间件阅读笔记" class="headerlink" title="中间件阅读笔记"></a>中间件阅读笔记</h1><h2 id="推拉模式的选择"><a href="#推拉模式的选择" class="headerlink" title="推拉模式的选择"></a>推拉模式的选择</h2><p>使用长连接拉模式，在消息的实时性方面丝毫不逊推送模式</p>
+<h2 id="低延时探索"><a href="#低延时探索" class="headerlink" title="低延时探索"></a>低延时探索</h2><ul>
+<li>考量性能从吞吐量和延迟两方面考虑</li>
+<li>依赖系统自身的page cache，全链路延时不可控</li>
+<li>延时变高导致该时间系统内处理的请求数增多，会导致某些节点不可用并扩散，导致雪崩</li>
+</ul>
+<h3 id="锁相关"><a href="#锁相关" class="headerlink" title="锁相关"></a>锁相关</h3><p>非公平锁：加锁时不考虑排队问题，直接尝试获取锁，若失败则自动进行排队。<br>非公平锁导致线程等待时间过长，延迟变高。</p>
+<p>锁同步会引起上下文切换，会带来一定开销。上下文切换一般为微妙级，当线程数过多，竞争压力大时，会产生数十毫秒级别的开销。</p>
+<p>为避免锁带来的延迟，可利用CAS原语将核心链路无锁化。</p>
+<h3 id="内存没那么快"><a href="#内存没那么快" class="headerlink" title="内存没那么快"></a>内存没那么快</h3><p>受限于linux的内存管理机制，应用程序访问内存时有时候会产生高延迟。</p>
+<p>linux会尽可能用内存来做缓存，大多时候服务器可用内存比较少。当可用内存少时，应用程序申请或者访问新内存页会发生内存回收，当后台内存回收速度不及分配内存的速度时，会进入直接回收（direct reclaim），应用程序会自旋等待内存回收完毕，产生巨大延迟。</p>
+<p>通过vm.extra_free_kbytes和vm.swappiness调优来避免。</p>
+<h3 id="page-cache——利与弊"><a href="#page-cache——利与弊" class="headerlink" title="page cache——利与弊"></a>page cache——利与弊</h3><p>page cache作为文件缓存能加速数据的读写，但遇到os进行脏页回收/内存回收/内存换入换出等情形时，会产生较大的读写延迟，即偶发的高延迟。</p>
+<p>通过内存预分配/文件预热/mlock系统调用/读写分离来消除延迟，同时能利用page cache的优点。</p>
+<h2 id="容量保障"><a href="#容量保障" class="headerlink" title="容量保障"></a>容量保障</h2><p>降级限流熔断三大措施来保障核心服务的资源，暂停边缘服务。</p>
+<h3 id="限流"><a href="#限流" class="headerlink" title="限流"></a>限流</h3><p>消息对列中对于慢请求（排队等待时间以及服务时间超过某个阈值的请求）进行容错处理。</p>
+<p>对于离线应用场景，利用滑动窗口机制，缓慢缩小窗口以减缓从服务端拉取的频率，降低对服务端的影响。</p>
+<p>对于高频交易/数据复制的场景，则采取了快速失败的策略，既能预防应用程序连锁的资源耗尽而引发应用雪崩，又能降低服务端压力，为端到端低延迟带来可靠保障。</p>
+<h3 id="降级"><a href="#降级" class="headerlink" title="降级"></a>降级</h3><p>通过服务的QOS定义设置，提前约定划分等级，在洪峰期间进行丢车保帅的策略执行。</p>
+<h3 id="熔断"><a href="#熔断" class="headerlink" title="熔断"></a>熔断</h3><p>Netflix公司开源了他们的熔断解决方案hystrix。</p>
+<h2 id="高可用"><a href="#高可用" class="headerlink" title="高可用"></a>高可用</h2><h3 id="高可用架构中的技术与权衡"><a href="#高可用架构中的技术与权衡" class="headerlink" title="高可用架构中的技术与权衡"></a>高可用架构中的技术与权衡</h3><table>
+<thead>
+<tr>
+<th>type</th>
+<th>Backups</th>
+<th>Master/Slave</th>
+<th>Master/Master</th>
+<th>2PC</th>
+<th>Paxos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Consistency</td>
+<td>Weak</td>
+<td>Eventual</td>
+<td>Eventual</td>
+<td>Strong</td>
+<td>Strong</td>
+</tr>
+<tr>
+<td>Transactions</td>
+<td>No</td>
+<td>Full</td>
+<td>Local</td>
+<td>Full</td>
+<td>Full</td>
+</tr>
+<tr>
+<td>Latency</td>
+<td>Low</td>
+<td>Low</td>
+<td>Low</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Throughout</td>
+<td>High</td>
+<td>High</td>
+<td>High</td>
+<td>Low</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Data Loss</td>
+<td>Lots</td>
+<td>Some</td>
+<td>Some</td>
+<td>None</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Failover</td>
+<td>Down</td>
+<td>Read-Only</td>
+<td>RW</td>
+<td>RW</td>
+<td>RW</td>
+</tr>
+</tbody>
+</table>
+<p>不同的解决方案对各项指标的支持程度各有侧重。基于 CAP 原则，很难设计出一种高可用方案能同时够满足所有指标的优值。</p>
+<p>以 Master/Slave为例，一般满足如下几个特性： </p>
+<ol>
+<li>Slave是Master的备份，可以根据数据的重要程度设置Slave的个数。数据写请求命中Master，读请求可命中Master或者Slave。 </li>
+<li>写请求命中 Master 之后，数据可通过同步或者异步的方式从 Master复制到Slave上；其中同步复制模式需要保证Master和Slave均写成功后才反 馈给客户端成功；异步复制模式只需要保证Master写成功即可反馈给客户端成功。 </li>
+<li>数据通过同步或者异步方式从Master复制到Slave上，因此Master/Slave 结构至少能保证数据的终一致性；</li>
+</ol>
+<p>异步复制模式下，数据在Master写成功后即可反馈给客户端成功，因此系统拥有较低的延迟和较高的吞吐量，但同时会带来Master故障丢数据的可能性；如期望异步复制模式下Master故障时数据仍不丢，Slave只能以Read-Only的方式等待Master的恢复，即延长了系统的故障恢复时间。相反，Master/Slave结构中的同步复制模式会以增大数据写入延迟、降低系统吞吐量的代价来保证机器故障时数据不丢，同时降低系统故障恢复时间。</p>
+<h2 id="消息服务介绍"><a href="#消息服务介绍" class="headerlink" title="消息服务介绍"></a>消息服务介绍</h2><h3 id="路由系统"><a href="#路由系统" class="headerlink" title="路由系统"></a>路由系统</h3><p>路由系统，各个处理模块管道化，扩展性强。系统监听主站的交易、商品、 物流等变更事件，针对不同业务进行消息过滤、鉴权、转换、存储、日志打点等。 系统运行过程记录各个消息的处理状况，通过日志采集器输出给JStorm分析集 群处理并记录消息轨迹，做到每条消息有迹可循。 </p>
+<h3 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h3><p>存储系统,主要用于削峰填谷，基于 BitCask 存储结构和内存映射文件，磁 盘完全顺序写入，速度极佳。数据读取基于 FileRegion 零拷贝技术，减少内存 拷贝消耗，数据读取速度极快。存储系统部署在多个机房，有一定容灾能力。 </p>
+<h3 id="推送系统"><a href="#推送系统" class="headerlink" title="推送系统"></a>推送系统</h3><p>推送系统，基于Disputor构建事件驱动模型，使用Netty作为网络层框架， 构建海量连接模型，根据连接吞吐量智能控制流量，降低慢连接对系统的压力； 使用WebSocket构建    长连接通道，延时更低；使用对象池技术，有效降低 系统GC频率；从消息的触发，到拉取，到发送，到确认，整个过程完全异步， 性能极佳。</p>
+<h3 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h3><p>面向公网的应用，消息密度低，随机性强，使用服务端推送的消息消费模式。</p>
+<h4 id="快速确认消息"><a href="#快速确认消息" class="headerlink" title="快速确认消息"></a>快速确认消息</h4><p>公网环境大部分消息一次就会消费成功，少数需要多次尝试。即99%的数据会在几秒内读写各一次，两次操作完成这条数据就失去了意义。</p>
+<p>将待消费的数据存到内存，则少数一直未被消费的数据会丢失（内存队列用完）。数据都存到磁盘则磁盘压力大，性能差，为了少数数据而将全部数据都写磁盘不值得。通过多级缓存的思路来处理这类问题效果比较好，即针对这种场景，系统在存储子系统使用HeapMemory、 DirectMemory、FileSystem三级存储结构。</p>
+<p>为了保护存储系统内存使用情况，HeapMemory存储近10秒发送记录，其余的数据会异步写入内存映射文件中，并写入磁盘。HeapMemory基于时间维度划分成三个HashMap，随着时钟滴答可无锁切换，DirectMemory基于消息队列和时间维度划分成多个链表，形成链表环，新数据写入指针头链表，末端指针指向的是已经超时的事务所在链表。</p>
+<p>这里，基于消息队列维护，可以有效隔离各个队列之间的影响；基于时间分片不仅能控制链表长度，也便于扫描超时的事务。在这种模式下，95%的消息事务会在HeapMemory内完成，5%的消息会 在 DirectMemory完成，极少的消息会涉及磁盘读写，绝大部分消息事务均在内存完成，节省大量服务器资源。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2017-03-13T15:15:40.138Z" itemprop="dateUpdated">2017年3月13日 15:15</time>
+</span><br>
+
+
+        转载请注明出处：<a href="/2017/03/13/阿里中间件阅读笔记/" target="_blank" rel="external">https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/</a>
+    </div>
+    <footer>
+        <a href="https://moying050.github.io">
+            <img src="/img/head_smile.jpg" alt="Wei GAO">
+            Wei GAO
+        </a>
+    </footer>
+</blockquote>
+
+        
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/中间件/">中间件</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/消息队列/">消息队列</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/&title=《阿里中间件阅读笔记》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/&title=《阿里中间件阅读笔记》 — wei的博客&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《阿里中间件阅读笔记》 — wei的博客&url=https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/&via=https://moying050.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2017/03/13/并发控制相关/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">并发控制相关</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+<div class="comments" id="comments">
+    <div class="ds-thread" data-thread-key="阿里中间件阅读笔记" data-title="阿里中间件阅读笔记" data-url="https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/"></div>
+</div>
+<script>
+lazyScripts.push('//cdn.bootcss.com/marked/0.3.6/marked.min.js');
+
+var duoshuoQuery = {short_name:'moying050_github', theme: 'none'};
+lazyScripts.push('/js/embed.min.js?v=1.4.10');
+
+
+</script>
+
+
+
+
+
+
+
+</article>
+
+<div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        谢谢大爷~
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <ul class="reward-items">
+        
+        <li>
+            <img src="/img/wechat.jpg" title="微信打赏二维码" alt="微信打赏二维码">
+            <p>微信</p>
+        </li>
+        
+
+        
+        <li>
+            <img src="/img/alipay.jpg" title="支付宝打赏二维码" alt="支付宝打赏二维码">
+            <p>支付宝</p>
+        </li>
+        
+    </ul>
+</div>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            <span>博客内容遵循 <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a></span>
+            <span>wei的博客 &copy; 2015 - 2017</span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/&title=《阿里中间件阅读笔记》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/&title=《阿里中间件阅读笔记》 — wei的博客&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《阿里中间件阅读笔记》 — wei的博客&url=https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/&via=https://moying050.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017/03/13/阿里中间件阅读笔记/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACs0lEQVR42u3a0WrrMBAE0P7/T6dwnwrF7syu1YbL8VNwEttHAWkzq4+P+Hj9O76+/nom+db38+0Vks8PDzw8PLzRo18dVw/01LsJ4/55rp4ZDw8P7zQvn5TvL3c/6effaofg8jweHh7en/JmmLwgxsPDw/u/eW00kJTd9wsPHh4e3rvxkjAigd0vHptS+3jWgoeHhxfzZg2wv319vL+Hh4eHN+qq50deRs8CiOFT4eHh4R3gbZpbSYHbRhJJ0FBHJHh4eHi/ztsvBpvtWQm7/jeAh4eHt+Bt2lqbNn97l3Zw8fDw8M7x2uSzRbbbApL75uEFHh4e3gleslFgVqPutwu0n7wMcPHw8PAe5W3C2c0kPltycl7xG+Lh4eGNeHnFPZugNwtPfs0oksDDw8M7wEs+mg/BJuqdDf2q+4eHh4c34uUhaVsut4B8+PL2GB4eHt6ed/+IyS3bzVV54z+/7+Xw4eHh4R3g5UXzrNHVBsGbWDn6DfHw8PDWvLw4bovgtsWVD0oR7+Lh4eEd4OXR7eb8ZtLfhyN4eHh4p3l5u2tWRrdhcb4gFZuu8PDw8Na8PBLdxLizCGPTJMPDw8M7zWvb/5uyuI0t2s1heHh4eL/D24QISaGcbBGYbUH4IYzAw8PDe5Q3m7jb8ZthZnFGseLh4eHhjXhJy6rdhpW/2zbD8qgCDw8P7xzvFR+z4jiZ+vPz9UDj4eHhHeC1IWl+oXZzwD7YXSHx8PDwYt6rPPL4YD9Ys8VjWFLj4eHhHejO53HAht0uHk/dCw8PD6/ltS2u2aScLzZJIV4MNx4eHt4x3lMR7cGwdbYI4eHh4b0BL2e3i8G+oMfDw8N7N1574zZQ2LTTfmiD4eHh4R3g5WFEu4Qkk3jOHi4MeHh4eI/y2qI2Xyry0nxWiLdtOTw8PLw17xPOt+QpxmVy0gAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+
+
+
+</script>
+
+<script src="/js/main.min.js?v=1.4.10"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="/js/search.min.js?v=1.4.10" async></script>
+
+
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+
+
+
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+
+</body>
+</html>
