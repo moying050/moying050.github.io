@@ -148,6 +148,69 @@
     <ul class="post-list">
     
         <li class="post-list-item fade">
+            <article id="post-并发控制相关"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2017年03月13日 14:52" datetime="2017-03-13T14:52:01.000Z"  itemprop="datePublished">2017-03-13</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/程序设计/">程序设计</a></li></ul>
+
+
+
+        
+
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/2017/03/13/并发控制相关/">并发控制相关</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        并发控制相关对锁的理解
+资源的并发保护
+保证临界区的顺序（内存屏障/CPU屏障）
+当锁持有时间占比在90%以上时，不如让单线程去访问这个资源
+
+并发控制的方法
+互斥锁
+读写锁
+CAS
+原子量
+RCU
+多版本控制
+行锁
+
+读写锁读写锁适合资源写少读多（多线程并发读比例高）的场景，而且linux的读写锁实现效率不高（单个写线程，20个读线程的情况下，如果没有很重的读开销，则使用读写锁反而比使用m...
+    
+
+        <a href="/2017/03/13/并发控制相关/" class="post-more waves-effect waves-button">
+            阅读全文...
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/分布式/">分布式</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/高并发/">高并发</a></li></ul>
+
+    </div>
+    
+</article>
+
+        </li>
+    
+        <li class="post-list-item fade">
             <article id="post-ssd近期趋势"
   class="article-card article-type-post" itemprop="blogPost">
 

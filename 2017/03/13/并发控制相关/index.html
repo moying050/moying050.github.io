@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="utf-8">
+    
+    
+    
+    <title>并发控制相关 | wei的博客 | 点点滴滴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="高并发,分布式">
+    <meta name="description" content="并发控制相关对锁的理解
+资源的并发保护
+保证临界区的顺序（内存屏障/CPU屏障）
+当锁持有时间占比在90%以上时，不如让单线程去访问这个资源
+
+并发控制的方法
+互斥锁
+读写锁
+CAS
+原子量
+RCU
+多版本控制
+行锁
+
+读写锁读写锁适合资源写少读多（多线程并发读比例高）的场景，而且linux的读写锁实现效率不高（单个写线程，20个读线程的情况下，如果没有很重的读开销，则使用读写锁反而比使用mute">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并发控制相关">
+<meta property="og:url" content="https://moying050.github.io/2017/03/13/并发控制相关/index.html">
+<meta property="og:site_name" content="wei的博客">
+<meta property="og:description" content="并发控制相关对锁的理解
+资源的并发保护
+保证临界区的顺序（内存屏障/CPU屏障）
+当锁持有时间占比在90%以上时，不如让单线程去访问这个资源
+
+并发控制的方法
+互斥锁
+读写锁
+CAS
+原子量
+RCU
+多版本控制
+行锁
+
+读写锁读写锁适合资源写少读多（多线程并发读比例高）的场景，而且linux的读写锁实现效率不高（单个写线程，20个读线程的情况下，如果没有很重的读开销，则使用读写锁反而比使用mute">
+<meta property="og:updated_time" content="2017-03-13T14:57:11.124Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="并发控制相关">
+<meta name="twitter:description" content="并发控制相关对锁的理解
+资源的并发保护
+保证临界区的顺序（内存屏障/CPU屏障）
+当锁持有时间占比在90%以上时，不如让单线程去访问这个资源
+
+并发控制的方法
+互斥锁
+读写锁
+CAS
+原子量
+RCU
+多版本控制
+行锁
+
+读写锁读写锁适合资源写少读多（多线程并发读比例高）的场景，而且linux的读写锁实现效率不高（单个写线程，20个读线程的情况下，如果没有很重的读开销，则使用读写锁反而比使用mute">
+    
+        <link rel="alternative" href="/atom.xml" title="wei的博客" type="application/atom+xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.10">
+    <script>window.lazyScripts=[]</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</head>
+
+<body>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/head_smile.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Wei GAO</h5>
+          <a href="mailto:moying050@gmail.com" title="moying050@gmail.com" class="mail">moying050@gmail.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/moying050" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/moying050" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">并发控制相关</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">并发控制相关</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2017-03-13T14:52:01.000Z" itemprop="datePublished" class="page-time">
+  2017-03-13
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/程序设计/">程序设计</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#并发控制相关"><span class="post-toc-number">1.</span> <span class="post-toc-text">并发控制相关</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#对锁的理解"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">对锁的理解</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#并发控制的方法"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">并发控制的方法</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#读写锁"><span class="post-toc-number">1.2.1.</span> <span class="post-toc-text">读写锁</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#RCU"><span class="post-toc-number">1.2.2.</span> <span class="post-toc-text">RCU</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#MVCC"><span class="post-toc-number">1.2.3.</span> <span class="post-toc-text">MVCC</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CAS"><span class="post-toc-number">1.2.4.</span> <span class="post-toc-text">CAS</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#对无锁的理解"><span class="post-toc-number">1.2.4.1.</span> <span class="post-toc-text">对无锁的理解</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#行锁"><span class="post-toc-number">1.2.5.</span> <span class="post-toc-text">行锁</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#原子量"><span class="post-toc-number">1.2.6.</span> <span class="post-toc-text">原子量</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#内存屏障等"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">内存屏障等</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#疑问TODO"><span class="post-toc-number">1.3.1.</span> <span class="post-toc-text">疑问TODO</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#内存模型"><span class="post-toc-number">1.3.2.</span> <span class="post-toc-text">内存模型</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#软件内存模型"><span class="post-toc-number">1.3.2.1.</span> <span class="post-toc-text">软件内存模型</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#硬件内存模型"><span class="post-toc-number">1.3.2.2.</span> <span class="post-toc-text">硬件内存模型</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#顺序一致性"><span class="post-toc-number">1.3.2.3.</span> <span class="post-toc-text">顺序一致性</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#cpu-cache相关"><span class="post-toc-number">1.3.3.</span> <span class="post-toc-text">cpu cache相关</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#内存屏障"><span class="post-toc-number">1.3.4.</span> <span class="post-toc-text">内存屏障</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#原子指令和软件锁"><span class="post-toc-number">1.3.4.1.</span> <span class="post-toc-text">原子指令和软件锁</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Java-存储模型"><span class="post-toc-number">1.3.4.2.</span> <span class="post-toc-text">Java 存储模型</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#内存屏障对性能的影响"><span class="post-toc-number">1.3.4.3.</span> <span class="post-toc-text">内存屏障对性能的影响</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#参考文档"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">参考文档</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+<article id="post-并发控制相关"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">并发控制相关</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017年03月13日 14:52" datetime="2017-03-13T14:52:01.000Z"  itemprop="datePublished">2017-03-13</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/程序设计/">程序设计</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h1 id="并发控制相关"><a href="#并发控制相关" class="headerlink" title="并发控制相关"></a>并发控制相关</h1><h2 id="对锁的理解"><a href="#对锁的理解" class="headerlink" title="对锁的理解"></a>对锁的理解</h2><ul>
+<li>资源的并发保护</li>
+<li>保证临界区的顺序（内存屏障/CPU屏障）</li>
+<li>当锁持有时间占比在90%以上时，不如让单线程去访问这个资源</li>
+</ul>
+<h2 id="并发控制的方法"><a href="#并发控制的方法" class="headerlink" title="并发控制的方法"></a>并发控制的方法</h2><ul>
+<li>互斥锁</li>
+<li>读写锁</li>
+<li>CAS</li>
+<li>原子量</li>
+<li>RCU</li>
+<li>多版本控制</li>
+<li>行锁</li>
+</ul>
+<h3 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h3><p>读写锁适合资源写少读多（多线程并发读比例高）的场景，而且linux的读写锁实现效率不高（单个写线程，20个读线程的情况下，如果没有很重的读开销，则使用读写锁反而比使用mutex要慢，当然如果读操作很耗时，则使用读写锁会更划算）。</p>
+<p>linux下的pthread mutex实现，如果没有碰到竞争是不会陷入内核的。</p>
+<h3 id="RCU"><a href="#RCU" class="headerlink" title="RCU"></a>RCU</h3><p>RCU在内核中应用比较多，实现了读写的并行，在Writer端增加一定负担，使得Reader端几乎可以Zero-overhead，特别适用用读操作远远大与写操作的场景，或者写的优先级不如读高的场景。</p>
+<h3 id="MVCC"><a href="#MVCC" class="headerlink" title="MVCC"></a>MVCC</h3><p>MVCC让读不影响写，但读会读到旧数据。</p>
+<p>场景决定应用，我们需要根据资源的读写比例来选择合适的并发控制方法。</p>
+<h3 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h3><h4 id="对无锁的理解"><a href="#对无锁的理解" class="headerlink" title="对无锁的理解"></a>对无锁的理解</h4><ul>
+<li>基本上一两次自旋尝试就能成功的情况下使用CAS效率比锁的效率高</li>
+<li>使用一般锁会线程切换，如果极短时间就能拿锁，则线程切换的成本太高，反之亦然</li>
+<li>通过减少阻塞和等待，来改进并发性和可扩展性</li>
+<li>锁与锁之间的任务比较简单的时候，无锁编程更可行</li>
+<li>CAS会增加竞争性，这点会影响性能，因此需要测试来确认</li>
+<li>当临界区较短或者一个core上只有一个线程时，和mutex相比，使用spin lock性能较佳，因为避免了上下文切换。</li>
+<li>事务内存这种新技术扩展了CAS的应用范围</li>
+<li>使用无锁编程后，编译器乱序和指令乱序都遵循原则：内存执行顺序的基本原则–绝不修改单程序的行为，在多核情况下，则需要注意到乱序的存在。</li>
+</ul>
+<h3 id="行锁"><a href="#行锁" class="headerlink" title="行锁"></a>行锁</h3><p>行锁是解决一个大数据下的场景问题：总数据量很大，但同一时刻并发操作的数据量相对是很少的，这种情况下，通过行锁的机制可以解决这种场景的需求。</p>
+<p>举个例子，数据量有10亿，但同时刻并发量只有10w，则相当于10亿个数据共用了10w把锁，如果是普通锁机制，则需要10亿把锁。</p>
+<h3 id="原子量"><a href="#原子量" class="headerlink" title="原子量"></a>原子量</h3><ul>
+<li>对原子量的 ‘读出-计算-写入’ 操作序列是原子的，在以上动作完成之前，任何其它处理器和线程均无法访问该原子量。</li>
+<li>对原子量的 ‘读出-计算-写入’ 操作序列是原子的，在以上动作完成之前，任何其它处理器和线程均无法访问该原子量。</li>
+<li>性能方面的代价可以看内存屏障相关的内容</li>
+<li>在X86体系结构下，对于64位架构，只要同时满足以下两个条件，那么对该基础内置数据类型变量（int、bool、指针等）的普通读写都是原子的：<ul>
+<li>条件1:该变量按cache line对齐</li>
+<li>条件2:该变量sizeof值不超过64</li>
+</ul>
+</li>
+</ul>
+<h2 id="内存屏障等"><a href="#内存屏障等" class="headerlink" title="内存屏障等"></a>内存屏障等</h2><h3 id="疑问TODO"><a href="#疑问TODO" class="headerlink" title="疑问TODO"></a>疑问TODO</h3><p>在x86平台写无锁代码，是不是只要保证编译不乱序就可以？cache一致性如何处理，具体如何判断，如何操作</p>
+<h3 id="内存模型"><a href="#内存模型" class="headerlink" title="内存模型"></a>内存模型</h3><h4 id="软件内存模型"><a href="#软件内存模型" class="headerlink" title="软件内存模型"></a>软件内存模型</h4><p>C11与C++11编程语言是一种弱的软件内存模型。如果你正在用x86/64等强类型处理器家族，当在这些语言中使用底层的原子操作时并不会受到影响注3。我之前说过，只要是为了阻止编译器乱序，你必须要指定正确的内存执行顺序限制.</p>
+<h4 id="硬件内存模型"><a href="#硬件内存模型" class="headerlink" title="硬件内存模型"></a>硬件内存模型</h4><p>强内存模型意味着每个机器指令都能隐式的包含Acquire与Release语义。结果是，当一个CPU核执行一系列的写操作时，其它的每一个CPU核看见的都是那些值都以它们被写入时的顺序在改变。</p>
+<h4 id="顺序一致性"><a href="#顺序一致性" class="headerlink" title="顺序一致性"></a>顺序一致性</h4><p>在C++11中,当在原子数据类型执行操作的时候，可以使用默认的顺序约束，也就是memory_order_seq_cst。如果这么做了，工具链会限制编译器乱序并发出CPU特定的指令来充当合适的memory barrier。在这种方式下，尽管是在弱内存模型的多核设备上,也会模拟出顺序一致性的内存模型。</p>
+<h3 id="cpu-cache相关"><a href="#cpu-cache相关" class="headerlink" title="cpu cache相关"></a>cpu cache相关</h3><ul>
+<li>程序的运行存在时间和空间上的局部性<ul>
+<li>比如C语言中应该尽量减少静态变量的引用:静态变量存储在全局数据段，在一个被反复调用的函数体内，引用该变量需要对缓存多次换入换出，而如果是分配在堆栈上的局部变量，函数每次调用CPU只要从缓存中就能找到它了，因为堆栈的重复利用率高。</li>
+<li>循环体内的代码要尽量精简:代码是放在指令缓存里的，而指令缓存都是一级缓存，只有几K字节大小，如果对某段代码需要多次读取，而这段代码又跨越一个L1缓存大小，那么缓存优势将荡然无存。</li>
+</ul>
+</li>
+<li>CPU的流水线(pipeline)并发性</li>
+</ul>
+<h3 id="内存屏障"><a href="#内存屏障" class="headerlink" title="内存屏障"></a>内存屏障</h3><ul>
+<li>store barrier，在x86 上是”sfence”指令，强迫所有的、在屏障指令之前的 存储指令在屏障以前发生，并且让 store buffers 刷新到发布这个指令的 CPU cache。这将使程序状态对其他 CPU 可见，这样，如果需要它们可以对它做出响应。</li>
+<li>load barrier: 加载屏障，在x86 上是”lfence”指令，强迫所有的、加载指令之后的指令在屏障之后发生，然后等待那个 CPU 的 load buffer 排空。</li>
+<li>Full Barrier，在x86 上是”mfence”指令，在 CPU 上是加载和内存屏障的组合。</li>
+</ul>
+<h4 id="原子指令和软件锁"><a href="#原子指令和软件锁" class="headerlink" title="原子指令和软件锁"></a>原子指令和软件锁</h4><p>原子指令，如x86里的 “lock …” 指令，是高效的 full barrier，它们锁住存储子系统来执行操作，有受保证的全序关系（total order），即使跨 CPU。软件锁通常使用内存屏障，或原子指令来达到可视性和保留程序顺序。</p>
+<h4 id="Java-存储模型"><a href="#Java-存储模型" class="headerlink" title="Java 存储模型"></a>Java 存储模型</h4><p>在Java 存储模型里，volatile 字段在写入后插入一个内存屏障，在读取前插入加载屏障。类里面修饰为 final 的字段在它们被初始化后插入一个存储指令，以确这些字段在构造函数完成、有可用引用到这个对象时是可见的。</p>
+<h4 id="内存屏障对性能的影响"><a href="#内存屏障对性能的影响" class="headerlink" title="内存屏障对性能的影响"></a>内存屏障对性能的影响</h4><p>内存屏障阻止了 CPU 执行很多隐藏内存延迟的技术，因此有它们有显著的性能开销，必须考虑。为了达到最大性能，最好对问题建模，这样处理器可以做工作单元，然后让所有必须的内存屏障在工作单元的边界上发生。采用这种方法允许处理器不受限制地优化工作单元。把必须的内存屏障分组是有益的，那样，在第一个之后的 buffer 刷新的开销会小点，因为没有工作需要进行重新填充它。</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="http://zkread.com/article/587804.html" target="_blank" rel="external">名不符实的读写锁</a></li>
+<li><a href="http://airekans.github.io/c/2016/04/23/rcu-intro" target="_blank" rel="external">Read-Copy Update，向无锁编程进发!</a></li>
+<li><a href="http://airekans.github.io/c/2016/05/10/dive-into-liburcu" target="_blank" rel="external">liburcu，一个用户态的RCU实现</a></li>
+<li><a href="http://www.tuicool.com/articles/EJrau2u" target="_blank" rel="external">HBase – 并发控制机制解析</a></li>
+<li><a href="http://www.infoq.com/cn/news/2014/11/cpp-lock-free-programming" target="_blank" rel="external">Herb Sutter谈论C++无锁编程</a></li>
+<li><a href="http://hedengcheng.com/?p=803" target="_blank" rel="external">并发编程系列之一：锁的意义</a></li>
+<li><a href="http://coolshell.cn/articles/11454.html" target="_blank" rel="external">从LONGADDER看更高效的无锁实现</a></li>
+<li><a href="http://coolshell.cn/articles/10249.html" target="_blank" rel="external">7个示例科普CPU CACHE</a></li>
+<li><a href="http://blog.jobbole.com/53697/" target="_blank" rel="external">内存屏障（Memory Barriers）</a></li>
+<li><a href="http://coolshell.cn/articles/9703.html" target="_blank" rel="external">无锁HASHMAP的原理与实现</a></li>
+<li><a href="http://www.cnblogs.com/coryxie/archive/2013/02/24/2951244.html" target="_blank" rel="external">Intel Haswell的事务内存分析</a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/06/20/mutexperf/" target="_blank" rel="external">深入探索并发编程系列(一)-锁不慢；锁竞争慢</a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/06/27/lightweightmutex/" target="_blank" rel="external">深入探索并发编程系列(二)-总是使用轻量级锁</a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/08/11/memoryreorder/" target="_blank" rel="external">深入探索并发编程系列(五)-将内存乱序逮个正着</a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/09/05/compilermemoryreorder/" target="_blank" rel="external">深入探索并发编程系列(六)-编译期间内存乱序 </a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/09/19/sourcecontrol/" target="_blank" rel="external">深入探索并发编程系列(七)-内存屏障:资源控制操作</a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/09/28/acquireandrelease/" target="_blank" rel="external">深入探索并发编程系列(八)-Acquire与Release语义</a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/10/30/memorymodel/" target="_blank" rel="external">深入探索并发编程系列(九)-弱/强内存模型</a></li>
+<li><a href="http://www.research.ibm.com/people/m/michael/spaa-2002.pdf" target="_blank" rel="external">High Performance Dynamic Lock-Free Hash Tables<br>and List-Based Sets</a></li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2017-03-13T14:57:11.124Z" itemprop="dateUpdated">2017年3月13日 14:57</time>
+</span><br>
+
+
+        转载请注明出处：<a href="/2017/03/13/并发控制相关/" target="_blank" rel="external">https://moying050.github.io/2017/03/13/并发控制相关/</a>
+    </div>
+    <footer>
+        <a href="https://moying050.github.io">
+            <img src="/img/head_smile.jpg" alt="Wei GAO">
+            Wei GAO
+        </a>
+    </footer>
+</blockquote>
+
+        
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/分布式/">分布式</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/高并发/">高并发</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017/03/13/并发控制相关/&title=《并发控制相关》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017/03/13/并发控制相关/&title=《并发控制相关》 — wei的博客&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017/03/13/并发控制相关/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《并发控制相关》 — wei的博客&url=https://moying050.github.io/2017/03/13/并发控制相关/&via=https://moying050.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017/03/13/并发控制相关/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2017/03/12/ssd近期趋势/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">ssd近期趋势</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+<div class="comments" id="comments">
+    <div class="ds-thread" data-thread-key="并发控制相关" data-title="并发控制相关" data-url="https://moying050.github.io/2017/03/13/并发控制相关/"></div>
+</div>
+<script>
+lazyScripts.push('//cdn.bootcss.com/marked/0.3.6/marked.min.js');
+
+var duoshuoQuery = {short_name:'moying050_github', theme: 'none'};
+lazyScripts.push('/js/embed.min.js?v=1.4.10');
+
+
+</script>
+
+
+
+
+
+
+
+</article>
+
+<div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        谢谢大爷~
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <ul class="reward-items">
+        
+        <li>
+            <img src="/img/wechat.jpg" title="微信打赏二维码" alt="微信打赏二维码">
+            <p>微信</p>
+        </li>
+        
+
+        
+        <li>
+            <img src="/img/alipay.jpg" title="支付宝打赏二维码" alt="支付宝打赏二维码">
+            <p>支付宝</p>
+        </li>
+        
+    </ul>
+</div>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            <span>博客内容遵循 <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p>
+            <span>Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a></span>
+            <span>wei的博客 &copy; 2015 - 2017</span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017/03/13/并发控制相关/&title=《并发控制相关》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017/03/13/并发控制相关/&title=《并发控制相关》 — wei的博客&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017/03/13/并发控制相关/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《并发控制相关》 — wei的博客&url=https://moying050.github.io/2017/03/13/并发控制相关/&via=https://moying050.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017/03/13/并发控制相关/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACHklEQVR42u3aS5LDIAwFwNz/0p5tNk70JDwV42aVygfTLBQJ8XqVx/E2Ju+fzZz+qjkwMDBuyzg+jvp3Pi/xbKFn78TPxcDAeACjEgorgbiyESmyskEYGBgYzanDrcHAwMBYy0gX0QvEGBgYGGkRWz/pSrepnmguqMUxMDBuyKifuv//60v6GxgYGLdiHOFIG5BpcDxaAwMDY29GekxWL0rTGXrHdhgYGM9hpGG0F2oni1tWsmJgYNyQUT+sT9O4XgGc/vY0w8XAwNiaMbm8lSaIaZH8muwoBgbGzRnzZkC6HZM2QHBbBAMDYwtGJRHslaPpZqUhHgMD4zmM625qrAq+pU8xMDAewJgXsZPz+Xope/lxGwYGxg8zek3ECr5X7qaXNjAwMJ7D6KVx8zA62UQMDIznMFa1HnspY3ro9iXDxcDAeAxjciViklzG1yxW5aEYGBg/z6gUpZOmY5pcxq0CDAyMrRlp2O09pr6U0YUPDAyMhzEmzYD5RbE64EvAxcDA2JSRthLTg7O0GG4GXAwMjE0Z9YkmBWpaMAdtUQwMjE0ZRzjWlqbpck/nwcDA2JqxaurPD5g3RNOAjoGBsR8jTftK+WbYQkhnLh23YWBgbMeYH36tva7RLGUxMDAwBslfenUjbVRgYGBgpE3KyVPqV80u+d/AwMD4YUYvXKYlbn2JFx63YWBg3JBRLx0rn/aua6SAZlMTAwPjfow/ViJqmNsioDEAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+
+
+
+</script>
+
+<script src="/js/main.min.js?v=1.4.10"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="/js/search.min.js?v=1.4.10" async></script>
+
+
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+
+
+
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+
+</body>
+</html>
