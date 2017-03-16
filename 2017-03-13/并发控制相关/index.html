@@ -37,7 +37,7 @@ RCU
 读写锁读写锁适合资源写少读多（多线程并发读比例高）的场景，而且linux的读写锁实现效率不高（单个写线程，20个读线程的情况下，如果没有很重的读开销，则使用读写锁反而比使用mute">
 <meta property="og:type" content="article">
 <meta property="og:title" content="并发控制相关">
-<meta property="og:url" content="https://moying050.github.io/2017/03/13/并发控制相关/index.html">
+<meta property="og:url" content="https://moying050.github.io/2017-03-13/并发控制相关/index.html">
 <meta property="og:site_name" content="wei的博客">
 <meta property="og:description" content="并发控制相关对锁的理解
 资源的并发保护
@@ -83,7 +83,7 @@ RCU
 <body>
     <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="loading" class="active"></div>
 
-    <aside id="menu" class="hide" >
+    <aside id="menu" class="hide">
   <div class="inner flex-row-vertical">
     <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
         <i class="icon icon-lg icon-close"></i>
@@ -95,7 +95,7 @@ RCU
         </a>
         <hgroup class="introduce">
           <h5 class="nickname">Wei GAO</h5>
-          <a href="mailto:moying050@gmail.com" title="moying050@gmail.com" class="mail">moying050@gmail.com</a>
+          <a href="mailto:moying050@gmail.com" title="moying050@gmail.com" class="mail" rel="external nofollow noopener noreferrer" target="_blank">moying050@gmail.com</a>
         </hgroup>
       </div>
     </div>
@@ -103,42 +103,42 @@ RCU
       <ul class="nav">
         
             <li class="waves-block waves-effect">
-              <a href="/"  >
+              <a href="/">
                 <i class="icon icon-lg icon-home"></i>
                 主页
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/archives"  >
+              <a href="/archives">
                 <i class="icon icon-lg icon-archives"></i>
                 Archives
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/tags"  >
+              <a href="/tags">
                 <i class="icon icon-lg icon-tags"></i>
                 Tags
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/categories"  >
+              <a href="/categories">
                 <i class="icon icon-lg icon-th-list"></i>
                 Categories
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="https://github.com/moying050" target="_blank" >
+              <a href="https://github.com/moying050" target="_blank" rel="external nofollow noopener noreferrer">
                 <i class="icon icon-lg icon-github"></i>
                 Github
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="http://www.weibo.com/moying050" target="_blank" >
+              <a href="http://www.weibo.com/moying050" target="_blank" rel="external nofollow noopener noreferrer">
                 <i class="icon icon-lg icon-weibo"></i>
                 Weibo
               </a>
@@ -205,13 +205,12 @@ RCU
         </nav>
     </aside>
     
-<article id="post-并发控制相关"
-  class="post-article article-type-post fade" itemprop="blogPost">
+<article id="post-并发控制相关" class="post-article article-type-post fade" itemprop="blogPost">
 
     <div class="post-card">
         <h1 class="post-card-title">并发控制相关</h1>
         <div class="post-meta">
-            <time class="post-time" title="2017年03月13日 14:52" datetime="2017-03-13T14:52:01.000Z"  itemprop="datePublished">2017-03-13</time>
+            <time class="post-time" title="2017年03月13日 14:52" datetime="2017-03-13T14:52:01.000Z" itemprop="datePublished">2017-03-13</time>
 
             
 	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/程序设计/">程序设计</a></li></ul>
@@ -219,7 +218,7 @@ RCU
 
 
             
-<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style="display:none">
     <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
 </span>
 
@@ -290,25 +289,25 @@ RCU
 <h4 id="Java-存储模型"><a href="#Java-存储模型" class="headerlink" title="Java 存储模型"></a>Java 存储模型</h4><p>在Java 存储模型里，volatile 字段在写入后插入一个内存屏障，在读取前插入加载屏障。类里面修饰为 final 的字段在它们被初始化后插入一个存储指令，以确这些字段在构造函数完成、有可用引用到这个对象时是可见的。</p>
 <h4 id="内存屏障对性能的影响"><a href="#内存屏障对性能的影响" class="headerlink" title="内存屏障对性能的影响"></a>内存屏障对性能的影响</h4><p>内存屏障阻止了 CPU 执行很多隐藏内存延迟的技术，因此有它们有显著的性能开销，必须考虑。为了达到最大性能，最好对问题建模，这样处理器可以做工作单元，然后让所有必须的内存屏障在工作单元的边界上发生。采用这种方法允许处理器不受限制地优化工作单元。把必须的内存屏障分组是有益的，那样，在第一个之后的 buffer 刷新的开销会小点，因为没有工作需要进行重新填充它。</p>
 <h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
-<li><a href="http://zkread.com/article/587804.html" target="_blank" rel="external">名不符实的读写锁</a></li>
-<li><a href="http://airekans.github.io/c/2016/04/23/rcu-intro" target="_blank" rel="external">Read-Copy Update，向无锁编程进发!</a></li>
-<li><a href="http://airekans.github.io/c/2016/05/10/dive-into-liburcu" target="_blank" rel="external">liburcu，一个用户态的RCU实现</a></li>
-<li><a href="http://www.tuicool.com/articles/EJrau2u" target="_blank" rel="external">HBase – 并发控制机制解析</a></li>
-<li><a href="http://www.infoq.com/cn/news/2014/11/cpp-lock-free-programming" target="_blank" rel="external">Herb Sutter谈论C++无锁编程</a></li>
-<li><a href="http://hedengcheng.com/?p=803" target="_blank" rel="external">并发编程系列之一：锁的意义</a></li>
-<li><a href="http://coolshell.cn/articles/11454.html" target="_blank" rel="external">从LONGADDER看更高效的无锁实现</a></li>
-<li><a href="http://coolshell.cn/articles/10249.html" target="_blank" rel="external">7个示例科普CPU CACHE</a></li>
-<li><a href="http://blog.jobbole.com/53697/" target="_blank" rel="external">内存屏障（Memory Barriers）</a></li>
-<li><a href="http://coolshell.cn/articles/9703.html" target="_blank" rel="external">无锁HASHMAP的原理与实现</a></li>
-<li><a href="http://www.cnblogs.com/coryxie/archive/2013/02/24/2951244.html" target="_blank" rel="external">Intel Haswell的事务内存分析</a></li>
-<li><a href="http://www.chongh.wiki/blog/2016/06/20/mutexperf/" target="_blank" rel="external">深入探索并发编程系列(一)-锁不慢；锁竞争慢</a></li>
-<li><a href="http://www.chongh.wiki/blog/2016/06/27/lightweightmutex/" target="_blank" rel="external">深入探索并发编程系列(二)-总是使用轻量级锁</a></li>
-<li><a href="http://www.chongh.wiki/blog/2016/08/11/memoryreorder/" target="_blank" rel="external">深入探索并发编程系列(五)-将内存乱序逮个正着</a></li>
-<li><a href="http://www.chongh.wiki/blog/2016/09/05/compilermemoryreorder/" target="_blank" rel="external">深入探索并发编程系列(六)-编译期间内存乱序 </a></li>
-<li><a href="http://www.chongh.wiki/blog/2016/09/19/sourcecontrol/" target="_blank" rel="external">深入探索并发编程系列(七)-内存屏障:资源控制操作</a></li>
-<li><a href="http://www.chongh.wiki/blog/2016/09/28/acquireandrelease/" target="_blank" rel="external">深入探索并发编程系列(八)-Acquire与Release语义</a></li>
-<li><a href="http://www.chongh.wiki/blog/2016/10/30/memorymodel/" target="_blank" rel="external">深入探索并发编程系列(九)-弱/强内存模型</a></li>
-<li><a href="http://www.research.ibm.com/people/m/michael/spaa-2002.pdf" target="_blank" rel="external">High Performance Dynamic Lock-Free Hash Tables<br>and List-Based Sets</a></li>
+<li><a href="http://zkread.com/article/587804.html" rel="external nofollow noopener noreferrer" target="_blank">名不符实的读写锁</a></li>
+<li><a href="http://airekans.github.io/c/2016/04/23/rcu-intro" rel="external nofollow noopener noreferrer" target="_blank">Read-Copy Update，向无锁编程进发!</a></li>
+<li><a href="http://airekans.github.io/c/2016/05/10/dive-into-liburcu" rel="external nofollow noopener noreferrer" target="_blank">liburcu，一个用户态的RCU实现</a></li>
+<li><a href="http://www.tuicool.com/articles/EJrau2u" rel="external nofollow noopener noreferrer" target="_blank">HBase – 并发控制机制解析</a></li>
+<li><a href="http://www.infoq.com/cn/news/2014/11/cpp-lock-free-programming" rel="external nofollow noopener noreferrer" target="_blank">Herb Sutter谈论C++无锁编程</a></li>
+<li><a href="http://hedengcheng.com/?p=803" rel="external nofollow noopener noreferrer" target="_blank">并发编程系列之一：锁的意义</a></li>
+<li><a href="http://coolshell.cn/articles/11454.html" rel="external nofollow noopener noreferrer" target="_blank">从LONGADDER看更高效的无锁实现</a></li>
+<li><a href="http://coolshell.cn/articles/10249.html" rel="external nofollow noopener noreferrer" target="_blank">7个示例科普CPU CACHE</a></li>
+<li><a href="http://blog.jobbole.com/53697/" rel="external nofollow noopener noreferrer" target="_blank">内存屏障（Memory Barriers）</a></li>
+<li><a href="http://coolshell.cn/articles/9703.html" rel="external nofollow noopener noreferrer" target="_blank">无锁HASHMAP的原理与实现</a></li>
+<li><a href="http://www.cnblogs.com/coryxie/archive/2013/02/24/2951244.html" rel="external nofollow noopener noreferrer" target="_blank">Intel Haswell的事务内存分析</a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/06/20/mutexperf/" rel="external nofollow noopener noreferrer" target="_blank">深入探索并发编程系列(一)-锁不慢；锁竞争慢</a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/06/27/lightweightmutex/" rel="external nofollow noopener noreferrer" target="_blank">深入探索并发编程系列(二)-总是使用轻量级锁</a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/08/11/memoryreorder/" rel="external nofollow noopener noreferrer" target="_blank">深入探索并发编程系列(五)-将内存乱序逮个正着</a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/09/05/compilermemoryreorder/" rel="external nofollow noopener noreferrer" target="_blank">深入探索并发编程系列(六)-编译期间内存乱序 </a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/09/19/sourcecontrol/" rel="external nofollow noopener noreferrer" target="_blank">深入探索并发编程系列(七)-内存屏障:资源控制操作</a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/09/28/acquireandrelease/" rel="external nofollow noopener noreferrer" target="_blank">深入探索并发编程系列(八)-Acquire与Release语义</a></li>
+<li><a href="http://www.chongh.wiki/blog/2016/10/30/memorymodel/" rel="external nofollow noopener noreferrer" target="_blank">深入探索并发编程系列(九)-弱/强内存模型</a></li>
+<li><a href="http://www.research.ibm.com/people/m/michael/spaa-2002.pdf" rel="external nofollow noopener noreferrer" target="_blank">High Performance Dynamic Lock-Free Hash Tables<br>and List-Based Sets</a></li>
 </ul>
 
         </div>
@@ -321,7 +320,7 @@ RCU
 </span><br>
 
 
-        转载请注明出处：<a href="/2017/03/13/并发控制相关/" target="_blank" rel="external">https://moying050.github.io/2017/03/13/并发控制相关/</a>
+        转载请注明出处：<a href="/2017-03-13/并发控制相关/" target="_blank" rel="external">https://moying050.github.io/2017-03-13/并发控制相关/</a>
     </div>
     <footer>
         <a href="https://moying050.github.io">
@@ -350,7 +349,7 @@ RCU
 <div class="page-share" id="pageShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017/03/13/并发控制相关/&title=《并发控制相关》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017-03-13/并发控制相关/&title=《并发控制相关》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博" rel="external nofollow noopener noreferrer">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -360,22 +359,22 @@ RCU
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017/03/13/并发控制相关/&title=《并发控制相关》 — wei的博客&source=" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017-03-13/并发控制相关/&title=《并发控制相关》 — wei的博客&source=" data-title=" QQ" rel="external nofollow noopener noreferrer">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017/03/13/并发控制相关/" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017-03-13/并发控制相关/" data-title=" Facebook" rel="external nofollow noopener noreferrer">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《并发控制相关》 — wei的博客&url=https://moying050.github.io/2017/03/13/并发控制相关/&via=https://moying050.github.io" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《并发控制相关》 — wei的博客&url=https://moying050.github.io/2017-03-13/并发控制相关/&via=https://moying050.github.io" data-title=" Twitter" rel="external nofollow noopener noreferrer">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017/03/13/并发控制相关/" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017-03-13/并发控制相关/" data-title=" Google+" rel="external nofollow noopener noreferrer">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -398,7 +397,7 @@ RCU
 <nav class="post-nav flex-row flex-justify-between">
   
     <div class="waves-block waves-effect prev">
-      <a href="/2017/03/13/阿里中间件阅读笔记/" id="post-prev" class="post-nav-link">
+      <a href="/2017-03-13/阿里中间件阅读笔记/" id="post-prev" class="post-nav-link">
         <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
         <h4 class="title">阿里中间件阅读笔记</h4>
       </a>
@@ -407,7 +406,7 @@ RCU
 
   
     <div class="waves-block waves-effect next">
-      <a href="/2017/03/12/ssd近期趋势/" id="post-next" class="post-nav-link">
+      <a href="/2017-03-12/ssd近期趋势/" id="post-next" class="post-nav-link">
         <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
         <h4 class="title">ssd近期趋势</h4>
       </a>
@@ -420,7 +419,7 @@ RCU
     
 
 <div class="comments" id="comments">
-    <div class="ds-thread" data-thread-key="并发控制相关" data-title="并发控制相关" data-url="https://moying050.github.io/2017/03/13/并发控制相关/"></div>
+    <div class="ds-thread" data-thread-key="并发控制相关" data-title="并发控制相关" data-url="https://moying050.github.io/2017-03-13/并发控制相关/"></div>
 </div>
 <script>
 lazyScripts.push('//cdn.bootcss.com/marked/0.3.6/marked.min.js');
@@ -471,10 +470,10 @@ lazyScripts.push('/js/embed.min.js?v=1.4.10');
     <div class="top">
         
 <p>
-    <span id="busuanzi_container_site_uv" style='display:none'>
+    <span id="busuanzi_container_site_uv" style="display:none">
         站点总访客数：<span id="busuanzi_value_site_uv"></span>
     </span>
-    <span id="busuanzi_container_site_pv" style='display:none'>
+    <span id="busuanzi_container_site_pv" style="display:none">
         站点总访问量：<span id="busuanzi_value_site_pv"></span>
     </span>
 </p>
@@ -482,12 +481,12 @@ lazyScripts.push('/js/embed.min.js?v=1.4.10');
 
         <p>
             <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
-            <span>博客内容遵循 <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0协议</a></span>
+            <span>博客内容遵循 <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="external nofollow noopener noreferrer">知识共享 署名 - 非商业性 - 相同方式共享 4.0协议</a></span>
         </p>
     </div>
     <div class="bottom">
         <p>
-            <span>Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a></span>
+            <span>Power by <a href="http://hexo.io/" target="_blank" rel="external nofollow noopener noreferrer">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank" rel="external nofollow noopener noreferrer">indigo</a></span>
             <span>wei的博客 &copy; 2015 - 2017</span>
         </p>
     </div>
@@ -502,7 +501,7 @@ lazyScripts.push('/js/embed.min.js?v=1.4.10');
 <div class="global-share" id="globalShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017/03/13/并发控制相关/&title=《并发控制相关》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017-03-13/并发控制相关/&title=《并发控制相关》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博" rel="external nofollow noopener noreferrer">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -512,22 +511,22 @@ lazyScripts.push('/js/embed.min.js?v=1.4.10');
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017/03/13/并发控制相关/&title=《并发控制相关》 — wei的博客&source=" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017-03-13/并发控制相关/&title=《并发控制相关》 — wei的博客&source=" data-title=" QQ" rel="external nofollow noopener noreferrer">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017/03/13/并发控制相关/" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017-03-13/并发控制相关/" data-title=" Facebook" rel="external nofollow noopener noreferrer">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《并发控制相关》 — wei的博客&url=https://moying050.github.io/2017/03/13/并发控制相关/&via=https://moying050.github.io" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《并发控制相关》 — wei的博客&url=https://moying050.github.io/2017-03-13/并发控制相关/&via=https://moying050.github.io" data-title=" Twitter" rel="external nofollow noopener noreferrer">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017/03/13/并发控制相关/" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017-03-13/并发控制相关/" data-title=" Google+" rel="external nofollow noopener noreferrer">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -538,7 +537,7 @@ lazyScripts.push('/js/embed.min.js?v=1.4.10');
 <div class="page-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACHklEQVR42u3aS5LDIAwFwNz/0p5tNk70JDwV42aVygfTLBQJ8XqVx/E2Ju+fzZz+qjkwMDBuyzg+jvp3Pi/xbKFn78TPxcDAeACjEgorgbiyESmyskEYGBgYzanDrcHAwMBYy0gX0QvEGBgYGGkRWz/pSrepnmguqMUxMDBuyKifuv//60v6GxgYGLdiHOFIG5BpcDxaAwMDY29GekxWL0rTGXrHdhgYGM9hpGG0F2oni1tWsmJgYNyQUT+sT9O4XgGc/vY0w8XAwNiaMbm8lSaIaZH8muwoBgbGzRnzZkC6HZM2QHBbBAMDYwtGJRHslaPpZqUhHgMD4zmM625qrAq+pU8xMDAewJgXsZPz+Xope/lxGwYGxg8zek3ECr5X7qaXNjAwMJ7D6KVx8zA62UQMDIznMFa1HnspY3ro9iXDxcDAeAxjciViklzG1yxW5aEYGBg/z6gUpZOmY5pcxq0CDAyMrRlp2O09pr6U0YUPDAyMhzEmzYD5RbE64EvAxcDA2JSRthLTg7O0GG4GXAwMjE0Z9YkmBWpaMAdtUQwMjE0ZRzjWlqbpck/nwcDA2JqxaurPD5g3RNOAjoGBsR8jTftK+WbYQkhnLh23YWBgbMeYH36tva7RLGUxMDAwBslfenUjbVRgYGBgpE3KyVPqV80u+d/AwMD4YUYvXKYlbn2JFx63YWBg3JBRLx0rn/aua6SAZlMTAwPjfow/ViJqmNsioDEAAAAASUVORK5CYII=" alt="微信分享二维码">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACJElEQVR42u3aQY6DMAwF0N7/0sx2NpRvOzMSycuqAhryWFixnc8nHtevMbl+N3P1X82BgYHxWsb1ddy9IHllwru7kq8NAwPjHEYSCr9PfXc3WW7+zO11DAwMjJtXJvNU58TAwMBYFXCTFHQeiDEwMDCqSWxe6ap+piTFXZaLY2BgvJCRV93///ef9DcwMDBexbiKo9qArAbHqzUwMDD2ZlTLZJNwmSN768HAwNibUQ2jvVA7WdyylBUDA+O1jN6f801kr6lQfh4DA2NTRt5i7KWvE3z+KTEwME5gTI5E5OWwVW2Ahx4sBgbGdozJ0he8OA7WheIaBgbGdoxqc3F+/qEafKO7GBgYBzB6Jf7JtjIJ94X2JwYGxgGMZLrv27VVSW8S4h9Oi2BgYBzJSJZS/SjVZPXhCgYGxgGM/NBDr/RWZecJbWGHi4GBsTWjt43rbS6bBT4MDIytGfkxr2ozshdk560CDAyMXRn5JqwafKsLrTYGPnmMx8DA2IgxKbT9xdGN/KAGBgbGCYxecMzT4PzgRa8Yh4GBcQIjTyAnm8K8hFc+QIaBgbEp4yqOaumtV+JPSnWFOh8GBsbLGb2pq6Ez/zS9pBoDA+MERrX1mIfFvBlZ2MnezYCBgXEAY9X2Lg+pi+fHwMDAiJ9JGgaTPexDRo6BgYFRbEP23pIsfUHAxcDAeCGjFy7nxf3qQQ0MDIwzGXnqWG1YJhvHSdkOAwPjAMYPoX7bGWmE5CMAAAAASUVORK5CYII=" alt="微信分享二维码">
 </div>
 
 
@@ -595,7 +594,7 @@ MathJax.Hub.Queue(function() {
 });
 </script>
 
-<script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
 
 

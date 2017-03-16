@@ -19,12 +19,12 @@
     <meta name="theme-color" content="#3F51B5">
     
     
-    <meta name="keywords" content="云存储,分布式">
+    <meta name="keywords" content="分布式,云存储">
     <meta name="description" content="看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。
 LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分别是用来存储和检索数据的一组数据节点，路由请求的前端机器（请求会在一些预处理之后路由到数据节点上）以及协调和维护集群的集群管理器。数据节点会在不同节点之间复制数据，同时支持数据中心内部和数据中间之间的复制。前端提供了支持对象PUT、GET和D">
 <meta property="og:type" content="article">
 <meta property="og:title" content="note of ambry">
-<meta property="og:url" content="https://moying050.github.io/2017/03/12/note-of-ambry/index.html">
+<meta property="og:url" content="https://moying050.github.io/2017-03-12/note-of-ambry/index.html">
 <meta property="og:site_name" content="wei的博客">
 <meta property="og:description" content="看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。
 LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分别是用来存储和检索数据的一组数据节点，路由请求的前端机器（请求会在一些预处理之后路由到数据节点上）以及协调和维护集群的集群管理器。数据节点会在不同节点之间复制数据，同时支持数据中心内部和数据中间之间的复制。前端提供了支持对象PUT、GET和D">
@@ -57,7 +57,7 @@ LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分�
 <body>
     <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="loading" class="active"></div>
 
-    <aside id="menu" class="hide" >
+    <aside id="menu" class="hide">
   <div class="inner flex-row-vertical">
     <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
         <i class="icon icon-lg icon-close"></i>
@@ -69,7 +69,7 @@ LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分�
         </a>
         <hgroup class="introduce">
           <h5 class="nickname">Wei GAO</h5>
-          <a href="mailto:moying050@gmail.com" title="moying050@gmail.com" class="mail">moying050@gmail.com</a>
+          <a href="mailto:moying050@gmail.com" title="moying050@gmail.com" class="mail" rel="external nofollow noopener noreferrer" target="_blank">moying050@gmail.com</a>
         </hgroup>
       </div>
     </div>
@@ -77,42 +77,42 @@ LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分�
       <ul class="nav">
         
             <li class="waves-block waves-effect">
-              <a href="/"  >
+              <a href="/">
                 <i class="icon icon-lg icon-home"></i>
                 主页
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/archives"  >
+              <a href="/archives">
                 <i class="icon icon-lg icon-archives"></i>
                 Archives
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/tags"  >
+              <a href="/tags">
                 <i class="icon icon-lg icon-tags"></i>
                 Tags
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/categories"  >
+              <a href="/categories">
                 <i class="icon icon-lg icon-th-list"></i>
                 Categories
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="https://github.com/moying050" target="_blank" >
+              <a href="https://github.com/moying050" target="_blank" rel="external nofollow noopener noreferrer">
                 <i class="icon icon-lg icon-github"></i>
                 Github
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="http://www.weibo.com/moying050" target="_blank" >
+              <a href="http://www.weibo.com/moying050" target="_blank" rel="external nofollow noopener noreferrer">
                 <i class="icon icon-lg icon-weibo"></i>
                 Weibo
               </a>
@@ -179,13 +179,12 @@ LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分�
         </nav>
     </aside>
     
-<article id="post-note-of-ambry"
-  class="post-article article-type-post fade" itemprop="blogPost">
+<article id="post-note-of-ambry" class="post-article article-type-post fade" itemprop="blogPost">
 
     <div class="post-card">
         <h1 class="post-card-title">note of ambry</h1>
         <div class="post-meta">
-            <time class="post-time" title="2017年03月12日 15:21" datetime="2017-03-12T15:21:03.000Z"  itemprop="datePublished">2017-03-12</time>
+            <time class="post-time" title="2017年03月12日 15:21" datetime="2017-03-12T15:21:03.000Z" itemprop="datePublished">2017-03-12</time>
 
             
 	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/系统设计/">系统设计</a></li></ul>
@@ -193,7 +192,7 @@ LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分�
 
 
             
-<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style="display:none">
     <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
 </span>
 
@@ -203,7 +202,7 @@ LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分�
         </div>
         <div class="post-content" id="post-content" itemprop="postContent">
             <p>看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。</p>
-<h1 id="LinkedIn的分布式对象存储系统-Ambry介绍"><a href="#LinkedIn的分布式对象存储系统-Ambry介绍" class="headerlink" title="LinkedIn的分布式对象存储系统 Ambry介绍"></a>LinkedIn的分布式对象存储系统 Ambry介绍</h1><p>Ambry由三部分组成，分别是用来存储和检索数据的一组数据节点，路由请求的前端机器（请求会在一些预处理之后路由到数据节点上）以及协调和维护集群的集群管理器。数据节点会在不同节点之间复制数据，同时支持数据中心内部和数据中间之间的复制。前端提供了支持对象PUT、GET和DELETE操作的HTTP API。另外，前端所使用的路由 库也可以直接用在客户端中，从而实现更好的性能。在LinkedIn，这些前端节点会作为CDN的原始服务器。<a href="https://github.com/linkedin/ambry/wiki/High%20Level%20Design" target="_blank" rel="external">ambry官方文档</a><br><a id="more"></a></p>
+<h1 id="LinkedIn的分布式对象存储系统-Ambry介绍"><a href="#LinkedIn的分布式对象存储系统-Ambry介绍" class="headerlink" title="LinkedIn的分布式对象存储系统 Ambry介绍"></a>LinkedIn的分布式对象存储系统 Ambry介绍</h1><p>Ambry由三部分组成，分别是用来存储和检索数据的一组数据节点，路由请求的前端机器（请求会在一些预处理之后路由到数据节点上）以及协调和维护集群的集群管理器。数据节点会在不同节点之间复制数据，同时支持数据中心内部和数据中间之间的复制。前端提供了支持对象PUT、GET和DELETE操作的HTTP API。另外，前端所使用的路由 库也可以直接用在客户端中，从而实现更好的性能。在LinkedIn，这些前端节点会作为CDN的原始服务器。<a href="https://github.com/linkedin/ambry/wiki/High%20Level%20Design" rel="external nofollow noopener noreferrer" target="_blank">ambry官方文档</a><br><a id="more"></a></p>
 <figure class="image-bubble">
                 <div class="img-lightbox">
                     <div class="overlay"></div>
@@ -444,7 +443,7 @@ LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分�
 </span><br>
 
 
-        转载请注明出处：<a href="/2017/03/12/note-of-ambry/" target="_blank" rel="external">https://moying050.github.io/2017/03/12/note-of-ambry/</a>
+        转载请注明出处：<a href="/2017-03-12/note-of-ambry/" target="_blank" rel="external">https://moying050.github.io/2017-03-12/note-of-ambry/</a>
     </div>
     <footer>
         <a href="https://moying050.github.io">
@@ -473,7 +472,7 @@ LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分�
 <div class="page-share" id="pageShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017/03/12/note-of-ambry/&title=《note of ambry》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017-03-12/note-of-ambry/&title=《note of ambry》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博" rel="external nofollow noopener noreferrer">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -483,23 +482,23 @@ LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成，分�
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017/03/12/note-of-ambry/&title=《note of ambry》 — wei的博客&source=看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。
-LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成..." data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017-03-12/note-of-ambry/&title=《note of ambry》 — wei的博客&source=看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。
+LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成..." data-title=" QQ" rel="external nofollow noopener noreferrer">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017/03/12/note-of-ambry/" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017-03-12/note-of-ambry/" data-title=" Facebook" rel="external nofollow noopener noreferrer">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《note of ambry》 — wei的博客&url=https://moying050.github.io/2017/03/12/note-of-ambry/&via=https://moying050.github.io" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《note of ambry》 — wei的博客&url=https://moying050.github.io/2017-03-12/note-of-ambry/&via=https://moying050.github.io" data-title=" Twitter" rel="external nofollow noopener noreferrer">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017/03/12/note-of-ambry/" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017-03-12/note-of-ambry/" data-title=" Google+" rel="external nofollow noopener noreferrer">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -522,7 +521,7 @@ LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成..." da
 <nav class="post-nav flex-row flex-justify-between">
   
     <div class="waves-block waves-effect prev">
-      <a href="/2017/03/12/ssd近期趋势/" id="post-prev" class="post-nav-link">
+      <a href="/2017-03-12/ssd近期趋势/" id="post-prev" class="post-nav-link">
         <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
         <h4 class="title">ssd近期趋势</h4>
       </a>
@@ -537,7 +536,7 @@ LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成..." da
     
 
 <div class="comments" id="comments">
-    <div class="ds-thread" data-thread-key="note-of-ambry" data-title="note of ambry" data-url="https://moying050.github.io/2017/03/12/note-of-ambry/"></div>
+    <div class="ds-thread" data-thread-key="note-of-ambry" data-title="note of ambry" data-url="https://moying050.github.io/2017-03-12/note-of-ambry/"></div>
 </div>
 <script>
 lazyScripts.push('//cdn.bootcss.com/marked/0.3.6/marked.min.js');
@@ -588,10 +587,10 @@ lazyScripts.push('/js/embed.min.js?v=1.4.10');
     <div class="top">
         
 <p>
-    <span id="busuanzi_container_site_uv" style='display:none'>
+    <span id="busuanzi_container_site_uv" style="display:none">
         站点总访客数：<span id="busuanzi_value_site_uv"></span>
     </span>
-    <span id="busuanzi_container_site_pv" style='display:none'>
+    <span id="busuanzi_container_site_pv" style="display:none">
         站点总访问量：<span id="busuanzi_value_site_pv"></span>
     </span>
 </p>
@@ -599,12 +598,12 @@ lazyScripts.push('/js/embed.min.js?v=1.4.10');
 
         <p>
             <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
-            <span>博客内容遵循 <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0协议</a></span>
+            <span>博客内容遵循 <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="external nofollow noopener noreferrer">知识共享 署名 - 非商业性 - 相同方式共享 4.0协议</a></span>
         </p>
     </div>
     <div class="bottom">
         <p>
-            <span>Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a></span>
+            <span>Power by <a href="http://hexo.io/" target="_blank" rel="external nofollow noopener noreferrer">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank" rel="external nofollow noopener noreferrer">indigo</a></span>
             <span>wei的博客 &copy; 2015 - 2017</span>
         </p>
     </div>
@@ -619,7 +618,7 @@ lazyScripts.push('/js/embed.min.js?v=1.4.10');
 <div class="global-share" id="globalShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017/03/12/note-of-ambry/&title=《note of ambry》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://moying050.github.io/2017-03-12/note-of-ambry/&title=《note of ambry》 — wei的博客&pic=https://moying050.github.io/img/head_smile.jpg" data-title="微博" rel="external nofollow noopener noreferrer">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -629,23 +628,23 @@ lazyScripts.push('/js/embed.min.js?v=1.4.10');
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017/03/12/note-of-ambry/&title=《note of ambry》 — wei的博客&source=看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。
-LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成..." data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://moying050.github.io/2017-03-12/note-of-ambry/&title=《note of ambry》 — wei的博客&source=看到ambry的设计文档，粗略做了下笔记，还没看代码实现，部分理解可能有出入。
+LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成..." data-title=" QQ" rel="external nofollow noopener noreferrer">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017/03/12/note-of-ambry/" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://moying050.github.io/2017-03-12/note-of-ambry/" data-title=" Facebook" rel="external nofollow noopener noreferrer">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《note of ambry》 — wei的博客&url=https://moying050.github.io/2017/03/12/note-of-ambry/&via=https://moying050.github.io" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《note of ambry》 — wei的博客&url=https://moying050.github.io/2017-03-12/note-of-ambry/&via=https://moying050.github.io" data-title=" Twitter" rel="external nofollow noopener noreferrer">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017/03/12/note-of-ambry/" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://moying050.github.io/2017-03-12/note-of-ambry/" data-title=" Google+" rel="external nofollow noopener noreferrer">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -656,7 +655,7 @@ LinkedIn的分布式对象存储系统 Ambry介绍Ambry由三部分组成..." da
 <div class="page-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACKklEQVR42u3aQZKjMAwF0Nz/0pntVM3gfEmhq7Efq64EGh6LH8vS6xUf77+Ofz9Zf9v7n687DgwMjMcy3stjfYPkqt6Z+bNhYGCcw7hKsOScPI57Ebx+NgwMDIx1CFaXegkJAwMD42cCN6k3kxeEgYGBUS1iewVtr1i9sRbHwMB4IGMekff9fUt/AwMD41GMd/GYhOYkrD88FQYGxtaMPODyJdr6896ZSQsBAwPjTEZ15KLXjPwWDAMDY1dGPgSWU3uDFAng8nwMDIwDGNV4TTbj5iHe/MXAwMA4hrG+eBSOcVg3p0UwMDC2YySY3rZ+HtmTjTkMDIwTGNVNsXxsK2kq9IL+P59gYGAcwMiXYtXbV8cvmqUvBgbG1oz1g1aL2N6is9q2vLw7BgbGpoxeWzEpPvMY7Q1bYGBgnMPI47J8cTHQq0VsHvoYGBh7MKrbZOuA7r256vK03FnFwMB4LCMvLAs5Xdxo+8JIBwYGxtaMvDGZx+hk/CsfILvcNcTAwDiG0Vs+Jhtt8zZAIXAxMDC2YyQLu97GXC+Uy+GOgYFxAGNeUlYDt/eybvzdwMDA+JWMd/GYACb7/B+25zAwMLZmzLuEvXGKfOE4aYtiYGDsxJgMVdwx/ZEHNwYGxmmM6gOtmwHrcJws+y6RGBgYGIMFXN5U6A1zYGBgYOQ3+9ZAajXcMTAwzmFUl3d51vWC+8btNgwMjAcy8tIxL0q/FdPzpScGBsbDGX8AMVUsur0ArJoAAAAASUVORK5CYII=" alt="微信分享二维码">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACIUlEQVR42u3aQXKDMAwFUO5/abrNTAfyJZEF9vOKSSjoZaHako4jXufH+v/J/be9Zx6/WBgYGK9lnLfr6p4c07szjw0DA2MfxlUG6z268PogBd/HhoGBgXF/T3Wrl5AwMDAwnmJMDp9JKsfAwMDoHWLvg+49p3dIxsDA2I0xT5G/u/5JfwMDA+NVjLO4Jklzkqy/RIWBgbE0o1dKS4pl94fe6p3RWzAwMLZkJIX+PMRmcPlmEQMDYwNGUvrP/7Y6SFGN4TLhYmBgLMfIR7uS9JrA8rckqRYDA2NPRm8TWc7xA0DUg8XAwFiI0UugSVk/3zhOCnMYGBg7MHrl/mRsK39LnvQvwRgYGBswqs3LXjGuOqJROPpiYGAszZgcZauH3sKAV68VgYGBsShjPmxaTdO9w+qXTzAwMJZmVFPqfHR1MrRRLeRhYGCsxOgV2vLjaC/Eo7owMDA2Y1S3jPkBNQ+3nL4xMDA2YPTS33xUondsvqwaYmBgbMCoBt3bSk7aAFHCxcDAWJqRD0lMSmzVlBrhMTAwNmBUhyfmCXc+5IGBgbED4yyuSSOzV+GPtq0YGBhLM+b9wWqTMt9uJtdlGAYGxmsZz7Yeq1vJ6uYyOsRiYGAsykiai3nzIB/O6P00lwkXAwMDY9wSqP5YebMTAwMDo3qdl+F6oT/8fwMDA+MljEkzoNk7jdP6w+U2DAyMFzKqhbMcmQQx3z5iYGAszfgDL+rGBDoct48AAAAASUVORK5CYII=" alt="微信分享二维码">
 </div>
 
 
@@ -713,7 +712,7 @@ MathJax.Hub.Queue(function() {
 });
 </script>
 
-<script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
 
 
